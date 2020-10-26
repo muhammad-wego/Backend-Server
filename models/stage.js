@@ -10,4 +10,4 @@ const stageSchema = new mongoose.Schema({
     }
 });
 
-exports.Stage = mongoose.model('Stage',stageSchema);
+module.exports = mongoose.model('Stage',stageSchema);

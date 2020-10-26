@@ -24,4 +24,4 @@ const personnelHealthSchema = new mongoose.Schema({
     }
 });
 
-exports.PersonnelHealth = mongoose.model('PersonnelHealth',personnelHealthSchema);
+module.exports = mongoose.model('PersonnelHealth',personnelHealthSchema);

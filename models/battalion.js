@@ -12,4 +12,4 @@ const battalionSchema = new mongoose.Schema({
     }]
 });
 
-exports.Battalion = mongoose.model('Battalion',battalionSchema);
+module.exports = mongoose.model('Battalion',battalionSchema);

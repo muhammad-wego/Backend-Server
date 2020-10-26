@@ -10,4 +10,4 @@ const consellingSchema = new mongoose.Schema({
     }
 });
 
-exports.Counselling = mongoose.model('Counselling',consellingSchema)
+module.exports = mongoose.model('Counselling',consellingSchema)
