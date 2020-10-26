@@ -22,4 +22,4 @@ const healthParameterSchema = new mongoose.Schema({
     }]
 });
 
-exports.HealthParameter = mongoose.model('HealthParameter',healthParameterSchema);
+module.exports = mongoose.model('HealthParameter',healthParameterSchema);

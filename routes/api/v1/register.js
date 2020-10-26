@@ -14,6 +14,8 @@ router.post('/',function(req,res){
                 personnelID : ObjectId(req.body.personnelID)
             });
 
+            console.log(hash);
+
             newAdmin.save((err,result)=>{
                 if(err) res.status(500).json({msg:"Registration Failed"});
                 else res.status(200).json({msg:"Registration Successfully"});

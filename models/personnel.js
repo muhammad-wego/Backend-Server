@@ -23,4 +23,4 @@ const personnelSchema = new mongoose.Schema({
     }
 });
 
-exports.Personnel = mongoose.model('Personnel',personnelSchema);
+module.exports = mongoose.model('Personnel',personnelSchema);
