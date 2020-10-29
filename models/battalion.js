@@ -9,6 +9,10 @@ const battalionSchema = new mongoose.Schema({
     companies:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Company'
+    }],
+    admins:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Admin'
     }]
 });
 

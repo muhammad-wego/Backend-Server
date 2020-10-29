@@ -17,9 +17,6 @@ const personnelSchema = new mongoose.Schema({
     },
     dateOfBirth:{
         type:Date
-    },
-    isAdmin:{
-        type:Boolean
     }
 });
 
