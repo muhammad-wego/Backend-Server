@@ -12,6 +12,13 @@ const adminSchema = new mongoose.Schema({
     personnelInfo : {
         type : mongoose.Schema.Types.ObjectId,
         ref : 'Personnel'
+    },
+    priority:{
+        type:Number
+    },
+    battalion:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Battalion'
     }
 });
 
