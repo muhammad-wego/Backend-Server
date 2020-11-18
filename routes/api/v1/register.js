@@ -6,19 +6,19 @@ const admin = require('../../../models/admin');
 
 router.post('/',function(req,res){
     bcrypt.hash(req.body.password,10,function(err,hash){
-        if(err) res.status(500).json({ msg : "Registration Failed"});
+        if(err) res.status(500).json({ message : "Registration Failed"});
         else {
+            if(!ObjectId.isValid(req.body.personnelID)) return res.status(401).json({message:"Invalid Personnel ID"});
             let newAdmin = new admin ({
                 username : req.body.username,
                 password : hash,
-                personnelID : ObjectId(req.body.personnelID)
+                personnelID : ObjectId(req.body.personnelID),
+                priority : req.body.priority
             });
 
-            console.log(hash);
-
             newAdmin.save((err,result)=>{
-                if(err) res.status(500).json({msg:"Registration Failed"});
-                else res.status(200).json({msg:"Registration Successfully"});
+                if(err) res.status(500).json({message:"Registration Failed"});
+                else res.status(200).json({message:"Registration Successfully"});
             });
         }
     });
