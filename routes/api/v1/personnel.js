@@ -17,7 +17,7 @@ router.post('/view/:id',AuthController.verify_token,function(req,res){
         .catch(err => {return res.status(500).json({message:"Internal Server Error"});});
 });
 
-router.post('/add',AuthController.verify_token,function(req,res){
+router.post('/add',AuthController.verify_token,AuthController.is_authorized,function(req,res){
     company.findOne({_id:ObjectId(req.body.companyID)}).then(matchedCompany => {
         if(!matchedCompany) return res.status(403).json({message:"Unauthorized"});
         else {
@@ -41,6 +41,27 @@ router.post('/add',AuthController.verify_token,function(req,res){
             });
         }
     });
+});
+
+router.delete('/remove',AuthController.verify_token,AuthController.is_authorized,function(req,res){
+    if(req.decoded.priority == 3) {
+        personnel.findOne({_id:ObjectId(req.body.personnelID)}).then(matchedPersonnel => {
+            if(!matchedPersonnel) return res.status(403).json({message:"Forbidded"});
+            else {
+                if(matchedPersonnel.company == req.decoded.company) {
+                    personnel.deleteOne({_id:ObjectId(req.body.personnelID)},(err,result)=>{
+                        if(err) return res.status(500).json({message:"Internal Server Error"});
+                        return res.status(200).json({message:"Personnel Deleted"});
+                    }).catch(err => {return res.status(500).json({message:"Internal Server Error"});});
+                }
+                else return res.status(403).json({message:"Unauthorized"});
+            }
+        }).catch(err=>{return res.status(500).json({message:"Internal Server Error"});});
+    }
+    else personnel.deleteOne({_id:ObjectId(req.body.personnelID)},(err,result)=>{
+        if(err) return res.status(500).json({message:"Internal Server Error"});
+        return res.status(200).json({message:"Personnel Deleted"});
+    }).catch(err => {return res.status(500).json({message:"Internal Server Error"});});
 });
 
 module.exports = router;
