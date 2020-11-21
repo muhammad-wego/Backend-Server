@@ -7,6 +7,9 @@ const consellingSchema = new mongoose.Schema({
     },
     dateOfCounselling:{
         type:Date
+    },
+    summary:{
+        type:String
     }
 });
 

@@ -4,9 +4,6 @@ const healthParameterSchema = new mongoose.Schema({
     name:{
         type:String
     },
-    type:{
-        type:String
-    },
     lowerRange:{
         type:Number
     },
@@ -17,8 +14,7 @@ const healthParameterSchema = new mongoose.Schema({
         type:Boolean
     },
     stages:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Stage'
+        type:String
     }]
 });
 
