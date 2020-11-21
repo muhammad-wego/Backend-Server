@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const company = require('../../../models/company');
 const battalion = require('../../../models/battalion');
+const admin = require('../../../models/admin');
+const personnel = require('../../../models/personnel');
 const ObjectId = require('mongodb').ObjectId;
 const AuthController = require('../../../contollers/AuthController');
 
@@ -24,13 +26,41 @@ router.post('/add',AuthController.verify_token,function(req,res){
                 battalion:req.body.battalion
             });
         
-            newCompany.save((err,result)=>{
+            newCompany.save((err,companyResult)=>{
                 if(err) return res.status(500).json({message:"Internal Server Error"});
                 else {
-                    matchedBattalion.companies.push(result._id);
-                    matchedBattalion.save((err,result)=>{
+                    matchedBattalion.companies.push(companyResult._id);
+                    matchedBattalion.save((err,battalionResult)=>{
                         if(err) return res.status(500).json({message:"Internal Server Error"});
-                        else return res.status(200).json({message:"Company Saved"});
+                        else {
+                            let newPersonnel = new personnel({
+                                personnelName : req.body.adminName,
+                                company : companyResult._id
+                            });
+
+                            newPersonnel.save((err,personnelResult) => {
+                                if(err) return res.status(500).json({message:"Internal Server Error"});
+                                else {
+                                    let newAdmin = new admin({
+                                        username : req.body.adminUsername,
+                                        password : req.body.adminPassword,
+                                        priority : 3,
+                                        battalion : req.body.battalion
+                                    });
+
+                                    newAdmin.save((err,adminResult)=>{
+                                        if(err) return res.status(500).json({message:"Internal Server Error"});
+                                        else {
+                                            companyResult.personnel.push(adminResult._id);
+                                            companyResult.save((err,result) => {
+                                                if(err) return res.status(500).json({message:"Internal Server Error"});
+                                                return res.status(200).json({message:"Company Created"});
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
                     });
                 }
             });

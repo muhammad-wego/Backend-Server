@@ -1,6 +1,7 @@
 const {check, validationResult} = require('express-validator');
 const jwt = require('jsonwebtoken');
 const jwt_secret = process.env['JWT_SECRET'];
+const admin = require('../models/admin');
 
 exports._sign_in_checks = [
     check('username').exists(),
@@ -22,8 +23,16 @@ exports.verify_token = function(req,res,next){
             if(err) return res.status(500).json({message:"Internal Server Error"});
 
             if(decoded.username){
-                req.decoded = decoded;
-                next();
+                admin.findOne({username:decoded.username}).then(matchedAdmin => {
+                    if(!matchedAdmin) return res.status(401).json({message:"Unauthorized"});
+                    else {
+                        req.decoded = decoded;
+                        req.decoded.priority = matchedAdmin.priority;
+                        next();
+                    }
+                }).catch(err => {
+                    return res.status(500).json({message:"Internal Server Error"});
+                });
             }
             else return res.status(401).json({message:"Authentication Failed"});
         });

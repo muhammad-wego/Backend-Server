@@ -8,15 +8,89 @@ Response is in JSON Format, an example is shown below
 
 ```
 {
-    "msg" : "Message Here",
+    "message" : "Message Here",
     "token" : "G903JMkf0-au321k-g21-kt-1@" 
 }
 ```
 ### Routes 
 
-_Login_  
-`/api/v1/login`  
+#### <u>Login</u>  
+#### POST `/api/v1/login`  
 Login Route Expects the following parameters
-> username : Contains the Username of Admin
+> username : (String) Contains the Username of Admin
 
-> password : Contains the Password
+> password : (String) Contains the Password
+
+#### <u>Battalion</u>
+#### POST `/api/v1/battalion/view/<BATTALION ID>`
+View Battalion Details
+
+> `<BATTALION ID>` expects ObjectId of Battalion 
+Pass `all` in `<COMPANY ID>` to view all battalions details
+
+#### POST `/api/v1/battalion/add`
+Create a Battalion
+
+It expects following Parameters
+> battalionNumber : (String) Battalion Number
+
+#### DELETE `/api/v1/battalion/remove`  
+Delete a Battalion
+
+It expects the following
+> battalionID : (ObjectId) ID of the Battalion
+
+#### <u>Company</u> 
+#### POST `/api/v1/company/view/<COMPANY ID>`
+View Company Details  
+
+> `<COMPANY ID>` expects ObjectId of Company  
+Pass `all` in `<COMPANY ID>` to view all companies details
+
+#### POST `/api/v1/company/add`
+Create a Company
+
+It Expects the Following Parameters
+> companyName : (String) Contains the Name of Company
+
+> battalion : (ObjectId) Battalion Id
+
+> adminName : (String) Admin Name
+
+> adminUsername : (String) Admin Username
+
+> adminPassword : (String) Admin Password
+
+#### DELETE `/api/v1/company/remove`
+Delete a Company
+
+It Expects the Following Parameters
+> companyID : (ObjectId) Company ID
+
+#### DELETE `/api/v1/company/remove`
+Delete a Company
+
+It Expects the Following Parameters
+> companyID : (ObjectId) Company ID
+
+
+#### <u>Personnel</u> 
+#### POST `/api/v1/personnel/view/<PERSONNEL ID>`
+View Personnel Detilas  
+
+> `<PERSONNEL ID>` expects ObjectId of Personnel  
+Pass `all` in `<PERSONNEL ID>` to view all companies details, Admin with Priority 1 ONLY.
+
+#### POST `/api/v1/personnel/add`
+Create a Personnel
+
+It Expects the Following Parameters
+> personnelName : (String) Name of the Personnel
+
+> company : (ObjectId) ID of the Company
+
+> rank : (String) Rank of the Personnel
+
+> metalNo : (String) Metal Number of the Personnel
+
+> dateOfBirth : (String) DOB of the Personnel
