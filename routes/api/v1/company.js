@@ -48,12 +48,18 @@ router.post('/add',AuthController.verify_token,function(req,res){
                                         battalion : req.body.battalion
                                     });
 
-                                    newAdmin.save((err,result)=>{
+                                    newAdmin.save((err,adminResult)=>{
                                         if(err) return res.status(500).json({message:"Internal Server Error"});
-                                        else return res.status(200).json({message:"Company Created"});
+                                        else {
+                                            companyResult.personnel.push(adminResult._id);
+                                            companyResult.save((err,result) => {
+                                                if(err) return res.status(500).json({message:"Internal Server Error"});
+                                                return res.status(200).json({message:"Company Created"});
+                                            });
+                                        }
                                     });
                                 }
-                            })
+                            });
                         }
                     });
                 }
