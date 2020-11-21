@@ -111,18 +111,19 @@ Add Health Parameter
 It Expects the Following Parameters
 > paramName : (String) Name of the Parameter
 
-> paramType : (String) Type of the Parameter
-
 > lowerRange : (Number) Lower Range
 
 > upperRange : (Number) Upper Range
 
 > normalPresence : (Boolean) Normal Presence
 
-> stages : [(ObjectID)] Stages
+> stages : [{
+    name: (String),
+    score : (Number)
+}] - Array of Objects holding Stage details
 
 #### DELETE `/api/v1/healthParameter/view/remove`
-Add Health Parameter
+Remove Health Parameter
 
 It Expects the Following Parameters
 > healthParamID : (ObjectID) ID Of Param to Delete

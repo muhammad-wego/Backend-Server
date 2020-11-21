@@ -18,6 +18,7 @@ let battalionRouter = require('./routes/api/v1/battalion');
 let companyRouter = require('./routes/api/v1/company');
 let personnelRouter = require('./routes/api/v1/personnel');
 let healthParamRouter = require('./routes/api/v1/healthParameter');
+let healthRouter = require('./routes/api/v1/health');
 
 // Routes
 app.use('/api/v1/login',loginRouter);
@@ -25,7 +26,8 @@ app.use('/api/v1/register',registerRouter);
 app.use('/api/v1/battalion',battalionRouter);
 app.use('/api/v1/company',companyRouter);
 app.use('/api/v1/personnel',personnelRouter);
-app.use('/api/v1/healthParameter',personnelRouter);
+app.use('/api/v1/healthParameter',healthParamRouter);
+app.use('/api/v1/health',healthRouter);
 
 let listener = app.listen(PORT || 3000,function(){
     console.log("Server started on PORT : " + PORT);

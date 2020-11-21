@@ -12,7 +12,6 @@ router.post('/view',AuthController.verify_token,function(req,res){
 router.post('/add',AuthController.verify_token,function(req,res){
     let newHealthParams = new healthParameter({
         name : req.body.paramName,
-        type : req.body.paramType,
         lowerRange : req.body.lowerRange,
         upperRange : req.body.upperRange,
         normalPresence : req.body.normalPresence
