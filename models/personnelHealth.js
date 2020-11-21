@@ -5,22 +5,27 @@ const personnelHealthSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'Personnel'
     },
-    healthParameter:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'HealthParameter'
-    },
-    stage:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Stage'
-    },
-    value:{
-        type:Number
-    },
-    presence:{
-        type:Boolean
-    },
+    parameters:
+        [{
+            healthParameter:{
+                type:mongoose.Schema.Types.ObjectId,
+                ref:'HealthParameter'
+            },
+            stage:{
+                type:String
+            },
+            value:{
+                type:Number
+            },
+            presence:{
+                type:Boolean
+            }
+        }],
     dateOfEntry:{
         type:Date
+    },
+    score:{
+        type:Number
     }
 });
 

@@ -1,10 +1,16 @@
 const mongoose = require('mongoose');
 
-const healthParameterSchema = new mongoose.Schema({
+const stageSchema = new mongoose.Schema({
     name:{
         type:String
     },
-    type:{
+    score:{
+        type:Number
+    }
+});
+
+const healthParameterSchema = new mongoose.Schema({
+    name:{
         type:String
     },
     lowerRange:{
@@ -16,10 +22,7 @@ const healthParameterSchema = new mongoose.Schema({
     normalPresence:{
         type:Boolean
     },
-    stages:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Stage'
-    }]
+    stages:[stageSchema]
 });
 
 module.exports = mongoose.model('HealthParameter',healthParameterSchema);
