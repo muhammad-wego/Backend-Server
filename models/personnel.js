@@ -17,6 +17,13 @@ const personnelSchema = new mongoose.Schema({
     },
     dateOfBirth:{
         type:Date
+    },
+    lastEntry:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'PersonnelHealth'
+    },
+    followUpRequired:{
+        type:Boolean
     }
 });
 
