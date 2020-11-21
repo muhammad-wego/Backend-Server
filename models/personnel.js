@@ -23,7 +23,8 @@ const personnelSchema = new mongoose.Schema({
         ref:'PersonnelHealth'
     },
     followUpRequired:{
-        type:Boolean
+        type:Boolean,
+        default : false
     }
 });
 

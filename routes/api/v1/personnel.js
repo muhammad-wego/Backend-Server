@@ -26,7 +26,7 @@ router.post('/add',AuthController.verify_token,AuthController.is_authorized,func
                 company : req.body.companyID,
                 rank : req.body.rank,
                 metalNo : req.body.metalNo,
-                dateOfBirth : req.body.dateOfBirth,
+                dateOfBirth : req.body.dateOfBirth
             });
 
             newPersonnel.save((err,result)=>{
