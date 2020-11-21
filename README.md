@@ -120,3 +120,9 @@ It Expects the Following Parameters
 > normalPresence : (Boolean) Normal Presence
 
 > stages : [(ObjectID)] Stages
+
+#### DELETE `/api/v1/healthParameter/view/remove`
+Add Health Parameter
+
+It Expects the Following Parameters
+> healthParamID : (ObjectID) ID Of Param to Delete
