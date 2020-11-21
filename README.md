@@ -94,3 +94,29 @@ It Expects the Following Parameters
 > metalNo : (String) Metal Number of the Personnel
 
 > dateOfBirth : (String) DOB of the Personnel
+
+#### DELETE `/api/v1/personnel/remove`
+Delete a Personnel
+
+It Expects the Following Parameters
+> personnelID : (ObjectId) ID of the Personnel
+
+#### <u>healthParameter</u> 
+#### POST `/api/v1/healthParameter/view`
+View Health Parameters Details  
+
+#### POST `/api/v1/healthParameter/view/add`
+Add Health Parameter
+
+It Expects the Following Parameters
+> paramName : (String) Name of the Parameter
+
+> paramType : (String) Type of the Parameter
+
+> lowerRange : (Number) Lower Range
+
+> upperRange : (Number) Upper Range
+
+> normalPresence : (Boolean) Normal Presence
+
+> stages : [(ObjectID)] Stages

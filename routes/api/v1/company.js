@@ -17,6 +17,7 @@ router.post('/view/:id',AuthController.verify_token,function(req,res){
 });
 
 router.post('/add',AuthController.verify_token,function(req,res){
+    if(req.decoded.priority > 2) return res.status(403).json({message:"Unauthorized"});
     battalion.findOne({_id:ObjectId(req.body.battalion)}).then(matchedBattalion => {
         if(!matchedBattalion) return res.status(403).json({message:"Unauthorized"});
         else {
@@ -72,6 +73,7 @@ router.post('/add',AuthController.verify_token,function(req,res){
 });
 
 router.delete('/remove',AuthController.verify_token,function(req,res){
+    if(req.decoded.priority > 2) return res.status(403).json({message:"Unauthorized"});
     company.deleteOne({_id:ObjectId(req.body.companyID)},(err,result)=>{
         if(err) return res.status(500).json({message:"Internal Server Error"});
         else return res.status(200).json({message:"Company Removed"});

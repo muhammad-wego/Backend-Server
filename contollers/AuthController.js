@@ -1,7 +1,9 @@
 const {check, validationResult} = require('express-validator');
 const jwt = require('jsonwebtoken');
 const jwt_secret = process.env['JWT_SECRET'];
+const ObjectId = require('mongodb').ObjectId;
 const admin = require('../models/admin');
+const personnel = require('../models/personnel');
 
 exports._sign_in_checks = [
     check('username').exists(),
@@ -23,19 +25,27 @@ exports.verify_token = function(req,res,next){
             if(err) return res.status(500).json({message:"Internal Server Error"});
 
             if(decoded.username){
-                admin.findOne({username:decoded.username}).then(matchedAdmin => {
-                    if(!matchedAdmin) return res.status(401).json({message:"Unauthorized"});
-                    else {
-                        req.decoded = decoded;
-                        req.decoded.priority = matchedAdmin.priority;
-                        next();
-                    }
-                }).catch(err => {
-                    return res.status(500).json({message:"Internal Server Error"});
-                });
+                req.decoded = decoded;
+                next();
             }
             else return res.status(401).json({message:"Authentication Failed"});
         });
     }
     else return res.status(401).json({message:"Authentication Failed"});
+}
+
+exports.is_authorized = function(req,res,next){
+    admin.findOne({username:decoded.username}).then(matchedAdmin => {
+        if(!matchedAdmin) return res.status(401).json({message:"Unauthorized"});
+        else {
+            personnel.findOne({_id:ObjectId(req.decoded.personnelID)}).then(matchedPersonnel => {
+                if(!matchedPersonnel) return res.status(401).json({message:"Authentication Failed"});
+                else {
+                    req.decoded.company = matchedPersonnel.company;
+                    req.decoded.priority = matchedAdmin.priority;
+                    next();
+                }
+            }).catch(err => {return res.status(500).json({message:"Internal Server Error"});});
+        }
+    }).catch(err => {return res.status(500).json({message:"Internal Server Error"});});
 }

@@ -13,7 +13,8 @@ router.post('/view/:id',AuthController.verify_token,function(req,res){
         .catch(err => {return res.status(500).json({message:"Internal Server Error"});});
 });
 
-router.post('/add',AuthController.verify_token,function(req,res){
+router.post('/add',AuthController.verify_token,AuthController.is_authorized,function(req,res){
+    if(req.decoded.priority > 1) return res.status(403).json({message:"Unauthorized"});
     let newBattalion = new battalion({
         battalionNumber : req.body.battalionNumber
     });
@@ -24,7 +25,8 @@ router.post('/add',AuthController.verify_token,function(req,res){
     });
 });
 
-router.delete('/remove',AuthController.verify_token,function(req,res){
+router.delete('/remove',AuthController.verify_token,AuthController.is_authorized,function(req,res){
+    if(req.decoded.priority > 1) return res.status(403).json({message:"Unauthorized"});
     battalion.deleteOne({_id:ObjectId(req.body.battalionID)},(err,result)=>{
         if(err) return res.status(500).json({message:"Internal Server Error"});
         else return res.status(200).json({message:"Battalion Removed"});
