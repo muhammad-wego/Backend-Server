@@ -23,6 +23,9 @@ const personnelHealthSchema = new mongoose.Schema({
         }],
     dateOfEntry:{
         type:Date
+    },
+    score:{
+        type:Number
     }
 });
 
