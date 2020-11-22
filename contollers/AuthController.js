@@ -38,14 +38,16 @@ exports.is_authorized = function(req,res,next){
     admin.findOne({username:decoded.username}).then(matchedAdmin => {
         if(!matchedAdmin) return res.status(401).json({message:"Unauthorized"});
         else {
-            personnel.findOne({_id:ObjectId(req.decoded.personnelID)}).then(matchedPersonnel => {
-                if(!matchedPersonnel) return res.status(401).json({message:"Authentication Failed"});
-                else {
-                    req.decoded.company = matchedPersonnel.company;
-                    req.decoded.priority = matchedAdmin.priority;
-                    next();
-                }
-            }).catch(err => {return res.status(500).json({message:"Internal Server Error"});});
+            req.decoded.priority = matchedAdmin.priority;
+            if(matchedAdmin.priority > 1)
+                personnel.findOne({_id:ObjectId(matchedAdmin.personnelInfo)}).then(matchedPersonnel => {
+                    if(!matchedPersonnel) return res.status(401).json({message:"Authentication Failed"});
+                    else {
+                        req.decoded.company = matchedPersonnel.company;
+                        next();
+                    }
+                }).catch(err => {return res.status(500).json({message:"Internal Server Error"});});
+            next();
         }
     }).catch(err => {return res.status(500).json({message:"Internal Server Error"});});
 }
