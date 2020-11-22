@@ -2,10 +2,14 @@ let express = require('express'),
 bodyParser = require('body-parser');
 let app = express();
 
+let cors = require('cors'); 
+
 require('dotenv').config({path: __dirname+'/.env'});
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
+app.use(cors())
 
 let PORT = process.env['PORT'];
 
