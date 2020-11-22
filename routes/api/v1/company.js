@@ -4,6 +4,7 @@ const company = require('../../../models/company');
 const battalion = require('../../../models/battalion');
 const admin = require('../../../models/admin');
 const personnel = require('../../../models/personnel');
+const bcrypt = require('bcrypt');
 const ObjectId = require('mongodb').ObjectId;
 const AuthController = require('../../../contollers/AuthController');
 
@@ -42,20 +43,25 @@ router.post('/add',AuthController.verify_token,function(req,res){
                             newPersonnel.save((err,personnelResult) => {
                                 if(err) return res.status(500).json({message:"Internal Server Error"});
                                 else {
-                                    let newAdmin = new admin({
-                                        username : req.body.adminUsername,
-                                        password : req.body.adminPassword,
-                                        priority : 3,
-                                        battalion : req.body.battalion
-                                    });
-
-                                    newAdmin.save((err,adminResult)=>{
+                                    bcrypt.hash(req.body.adminPassword,10,function(err,hash){
                                         if(err) return res.status(500).json({message:"Internal Server Error"});
                                         else {
-                                            companyResult.personnel.push(adminResult._id);
-                                            companyResult.save((err,result) => {
+                                            let newAdmin = new admin({
+                                                username : req.body.adminUsername,
+                                                password : hash,
+                                                priority : 3,
+                                                battalion : req.body.battalion
+                                            });
+        
+                                            newAdmin.save((err,adminResult)=>{
                                                 if(err) return res.status(500).json({message:"Internal Server Error"});
-                                                return res.status(200).json({message:"Company Created"});
+                                                else {
+                                                    companyResult.personnel.push(adminResult._id);
+                                                    companyResult.save((err,result) => {
+                                                        if(err) return res.status(500).json({message:"Internal Server Error"});
+                                                        return res.status(200).json({message:"Company Created"});
+                                                    });
+                                                }
                                             });
                                         }
                                     });
