@@ -16,7 +16,10 @@ router.post('/',AuthController._sign_in_checks,function(req,res){
                 else {
                     if(result){
                         let token = jwt.sign({username:matchedAdmin.username},JWT_SECRET,{expiresIn:8000});
-                        return res.status(200).json({token});
+                        return res.status(200).json({
+                            priority : matchedAdmin.priority,
+                            token
+                        });
                     }
                     else return res.status(401).json({message:"Authentication Failed"});
                 }
