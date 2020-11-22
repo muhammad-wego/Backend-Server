@@ -5,6 +5,39 @@ const personnelHealth = require('../../../models/personnelHealth');
 const ObjectId = require('mongodb').ObjectId;
 const AuthController = require('../../../contollers/AuthController');
 
+router.post('/view',AuthController.verify_token,AuthController.is_authorized,function(req,res){
+    let average = 0;
+    const averagePromise = new Promise((resolve,reject) => {
+        if(req.decoded.priority == 3) {
+            personnel.find({company:ObjectId(req.decoded.company)}).then(personnels => {
+                personnels.forEach((person,i) => {
+                    personnelHealth.findOne({_id:ObjectId(person.lastEntry)}).then(matchedRecord => {
+                        average += matchedRecord.score;
+                        if(i == personnels.length-1) resolve(average/i);
+                    }).catch(err => {
+                        reject();
+                    });
+                })
+            }).catch(err => {return res.status(500).json({message:"Internal Server Error"});});
+        }
+        else {
+            personnel.find().then(personnels => {
+                personnels.forEach((person,i) => {
+                    personnelHealth.findOne({_id:ObjectId(person.lastEntry)}).then(matchedRecord => {
+                        average += matchedRecord.score;
+                        if(i == personnels.length-1) resolve(average/i);
+                    }).catch(err => {
+                        reject();
+                    });
+                })
+            }).catch(err => {return res.status(500).json({message:"Internal Server Error"});});
+        }
+    });
+
+    averagePromise.then((average) => res.status(200).json({average}))
+    .catch(err => res.status(500).json({message:"Internal Server Error"}));
+});
+
 router.post('/add',AuthController.verify_token,AuthController.is_authorized,function(req,res){
     if(!ObjectId.isValid(req.body.personnelID)) return res.status(403).json({message:"Invalid Personnel"});
     personnel.findOne({_id:ObjectId(req.body.personnelID)}).then(matchedPersonnel => {

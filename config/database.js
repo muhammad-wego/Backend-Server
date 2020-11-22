@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const db_uri = 'mongodb://adminUser:password123@localhost:27017/ksrp';
+const db_uri = 'mongodb+srv://akashdeepb:p2r7ls8MTtMi0ipT@soscluster-utlqu.mongodb.net/test?retryWrites=true&w=majority';
 
 const options = {
     useNewUrlParser: true,

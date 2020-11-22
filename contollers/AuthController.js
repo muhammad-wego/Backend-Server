@@ -35,7 +35,7 @@ exports.verify_token = function(req,res,next){
 }
 
 exports.is_authorized = function(req,res,next){
-    admin.findOne({username:decoded.username}).then(matchedAdmin => {
+    admin.findOne({username:req.decoded.username}).then(matchedAdmin => {
         if(!matchedAdmin) return res.status(401).json({message:"Unauthorized"});
         else {
             req.decoded.priority = matchedAdmin.priority;
