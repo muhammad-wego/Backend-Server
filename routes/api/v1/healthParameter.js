@@ -14,10 +14,9 @@ router.post('/add',AuthController.verify_token,function(req,res){
         name : req.body.paramName,
         lowerRange : req.body.lowerRange,
         upperRange : req.body.upperRange,
-        normalPresence : req.body.normalPresence
+        normalPresence : req.body.normalPresence,
+        stages : req.body.stages
     });
-
-    if(typeof stages != 'undefined') newHealthParams.stages.push(req.body.stages);
 
     newHealthParams.save((err,result) => {
         if(err) return res.status(500).json({message:"Internal Server Error"});
