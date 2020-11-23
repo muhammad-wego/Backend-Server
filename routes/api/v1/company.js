@@ -9,11 +9,33 @@ const ObjectId = require('mongodb').ObjectId;
 const AuthController = require('../../../contollers/AuthController');
 
 router.post('/view/:id',AuthController.verify_token,function(req,res){
-    if(req.params.id == 'all')
-        company.find().then(companies => {return res.status(200).json({companies});})
-        .catch(err => {return res.status(500).json({message:"Internal Server Error"});});
+    if(req.params.id == 'all'){
+        let response = {companies:[]};
+        const companyProm = new Promise((resolve,reject) => {
+            company.find().then(companies => {
+                companies.forEach((com,i)=>{
+                    admin.find({company:com._id}).then(admins => {
+                        com = com.toJSON();
+                        com.admins = [];
+                        admins.forEach((admin,i)=>{
+                            admin = admin.toJSON();
+                            delete admin.password;
+                            com.admins.push(admin);
+                        });
+                        response.companies.push(com);
+                        resolve(response);
+                    }).catch(err => {return res.status(500).json({message:"Internal Server Error"});});
+                });
+            }).catch(err => {return res.status(500).json({message:"Internal Server Error"});});
+        })
+        .then((resp) => {return res.status(200).send(resp)});
+    }
     else 
-        company.findOne({_id:req.params.id}).then(matchedCompany => {return res.status(200).json({company:matchedCompany});})
+        company.findOne({_id:req.params.id}).then(matchedCompany => {
+            admin.find({company:matchedCompany._id}).then(admins => {
+                return res.status(200).json({company:matchedCompany,admins});
+            }).catch(err => {return res.status(500).json({message:"Internal Server Error"});});
+        })
         .catch(err => {return res.status(500).json({message:"Internal Server Error"});});
 });
 
@@ -50,7 +72,8 @@ router.post('/add',AuthController.verify_token,function(req,res){
                                                 username : req.body.adminUsername,
                                                 password : hash,
                                                 priority : 3,
-                                                battalion : req.body.battalion
+                                                battalion : req.body.battalion,
+                                                company : companyResult._id
                                             });
         
                                             newAdmin.save((err,adminResult)=>{

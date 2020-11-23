@@ -20,6 +20,10 @@ const adminSchema = new mongoose.Schema({
     battalion:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Battalion'
+    },
+    company:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Company'
     }
 });
 
