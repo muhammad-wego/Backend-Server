@@ -18,10 +18,10 @@ router.post('/view/:id',AuthController.verify_token,function(req,res){
 });
 
 router.post('/add',AuthController.verify_token,AuthController.is_authorized,function(req,res){
+    if(req.decoded.priority == 3) req.body.companyID = req.decoded.company;
     company.findOne({_id:ObjectId(req.body.companyID)}).then(matchedCompany => {
         if(!matchedCompany) return res.status(403).json({message:"Unauthorized"});
         else {
-            if(req.decoded.priority == 3) req.body.companyID = req.decoded.company;
             let newPersonnel = new personnel({
                 personnelName : req.body.personnelName,
                 company : req.body.companyID,
