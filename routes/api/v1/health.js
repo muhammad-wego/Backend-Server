@@ -23,8 +23,8 @@ router.post('/view',AuthController.verify_token,AuthController.is_authorized,fun
         else {
             personnel.find().then(personnels => {
                 personnels.forEach((person,i) => {
+                    console.log(person.lastEntry);
                     personnelHealth.findOne({_id:ObjectId(person.lastEntry)}).then(matchedRecord => {
-                        if(!matchedRecord) resolve(0)
                         average += matchedRecord.score;
                         if(i == personnels.length-1) resolve(average/i);
                     }).catch(err => {

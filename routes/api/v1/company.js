@@ -72,6 +72,7 @@ router.post('/add',AuthController.verify_token,function(req,res){
                                                 username : req.body.adminUsername,
                                                 password : hash,
                                                 priority : 3,
+                                                personnelInfo : personnelResult._id,
                                                 battalion : req.body.battalion,
                                                 company : companyResult._id
                                             });
