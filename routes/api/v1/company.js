@@ -137,7 +137,7 @@ router.post('/admin/add',AuthController.verify_token,AuthController.is_authorize
 
 router.delete('/admin/remove',AuthController.verify_token,AuthController.is_authorized,function(req,res){
     if(req.decoded.priority > 2) return res.status(403).json({message:"Unauthorized"});
-    admin.deleteOne({_id:ObjectId(adminID)},(err,result) => {
+    admin.deleteOne({_id:ObjectId(req.body.adminID)},(err,result) => {
         if(err) return res.status(500).json({message:"Internal Server Error"});
         return res.status(200).json({message:"Admin Removed"});
     });
