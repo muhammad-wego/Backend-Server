@@ -110,4 +110,27 @@ router.delete('/remove',AuthController.verify_token,function(req,res){
     });
 });
 
+router.post('/admin/add',AuthController.verify_token,AuthController.is_authorized,function(req,res){
+    if(req.decoded.priority > 2) return res.status(403).json({message:"Unauthorized"});
+    bcrypt.hash(req.body.adminPassword,10,function(err,hash){
+        if(err) return res.status(500).json({message:"Internal Server Error"});
+        else {
+            let newAdmin = new admin({
+                username : req.body.adminUsername,
+                password : hash,
+                priority : 3,
+                personnelInfo : req.body.personnelID,
+                battalion : req.body.battalion,
+                company : req.body.company
+            });
+
+            newAdmin.save((err,result)=>{
+                console.log(err);
+                if(err) return res.status(500).json({message:"Internal Server Error"});
+                else return res.status(200).json({message:"Admin Added"});
+            });
+        }
+    })
+});
+
 module.exports = router;
