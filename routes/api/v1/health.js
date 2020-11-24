@@ -24,10 +24,11 @@ router.post('/view',AuthController.verify_token,AuthController.is_authorized,fun
             personnel.find().then(personnels => {
                 personnels.forEach((person,i) => {
                     personnelHealth.findOne({_id:ObjectId(person.lastEntry)}).then(matchedRecord => {
+                        if(!matchedRecord) resolve(0)
                         average += matchedRecord.score;
                         if(i == personnels.length-1) resolve(average/i);
                     }).catch(err => {
-                        reject();
+                        reject(err);
                     });
                 })
             }).catch(err => {return res.status(500).json({message:"Internal Server Error"});});
@@ -35,7 +36,7 @@ router.post('/view',AuthController.verify_token,AuthController.is_authorized,fun
     });
 
     averagePromise.then((average) => res.status(200).json({average}))
-    .catch(err => res.status(500).json({message:"Internal Server Error"}));
+    .catch(err => {console.log(err);res.status(500).json({message:"Internal Server Error"})});
 });
 
 router.post('/add',AuthController.verify_token,AuthController.is_authorized,function(req,res){
@@ -46,16 +47,16 @@ router.post('/add',AuthController.verify_token,AuthController.is_authorized,func
             if(req.decoded.priority < 3 || req.decoded.company == matchedPersonnel.company){
                 let newHealthRep = new personnelHealth({
                     personnel : matchedPersonnel._id,
-                    dateOfEntry : req.body.dateOfEntry,
+                    dateOfEntry : new Date().getTime(),
                     score : 10
                 });
                 req.body.parameters.forEach((param,i)=>{
                     if(!ObjectId.isValid(param.healthParameter)) return res.status(403).json({message:"Unauthorized"});
                     let currentParam = {};
                     currentParam.healthParameter = param.healthParameter;
-                    if(typeof req.body.stage != 'undefined') currentParam.stage = req.body.stage;
-                    if(typeof req.body.value != 'undefined') currentParam.value = req.body.value;
-                    if(typeof req.body.presence != 'undefined') currentParam.presence = req.body.presence;                    
+                    if(typeof req.body.stage != 'undefined') currentParam.stage = param.stage;
+                    if(typeof req.body.value != 'undefined') currentParam.value = param.value;
+                    if(typeof req.body.presence != 'undefined') currentParam.presence = param.presence;                    
                     newHealthRep.parameters.push(currentParam);
                 });
                 newHealthRep.save((err,result) => {
