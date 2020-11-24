@@ -68,6 +68,8 @@ router.post('/add',AuthController.verify_token,function(req,res){
                                     bcrypt.hash(req.body.adminPassword,10,function(err,hash){
                                         if(err) return res.status(500).json({message:"Internal Server Error"});
                                         else {
+                                            companyResult.personnel.push(personnelResult._id);
+                                            companyResult.save((err,result)=>{if(err) return res.status(500).json({message:"Internal Server Error"});});
                                             let newAdmin = new admin({
                                                 username : req.body.adminUsername,
                                                 password : hash,
@@ -131,6 +133,14 @@ router.post('/admin/add',AuthController.verify_token,AuthController.is_authorize
             });
         }
     })
+});
+
+router.delete('/admin/remove',AuthController.verify_token,AuthController.is_authorized,function(req,res){
+    if(req.decoded.priority > 2) return res.status(403).json({message:"Unauthorized"});
+    admin.deleteOne({_id:ObjectId(adminID)},(err,result) => {
+        if(err) return res.status(500).json({message:"Internal Server Error"});
+        return res.status(200).json({message:"Admin Removed"});
+    });
 });
 
 module.exports = router;
