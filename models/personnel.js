@@ -13,7 +13,8 @@ const personnelSchema = new mongoose.Schema({
         type:String
     },
     metalNo:{
-        type:String
+        type:String,
+        unique : true
     },
     dateOfBirth:{
         type:Date

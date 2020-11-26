@@ -67,12 +67,25 @@ Delete a Company
 It Expects the Following Parameters
 > companyID : (ObjectId) Company ID
 
-#### DELETE `/api/v1/company/remove`
-Delete a Company
+#### POST `/api/v1/company/admin/add`
+Adds an Admin to existing Company
 
 It Expects the Following Parameters
-> companyID : (ObjectId) Company ID
+> adminUsername : (String) Username of new admin
 
+> adminPassword : (String) Password of new admin
+
+> personnelID : (ObjectId) ID of the Admin as personnel
+
+> battalion : (ObjectId) ID of the Battalion
+
+> company : (ObjectId) ID of the company
+
+#### DELETE `/api/v1/company/admin/remove`
+Remove an Admin from Company
+
+It Expects the Following Parameters
+> adminID : (ObjectId) ID of the admin to be removed
 
 #### <u>Personnel</u> 
 #### POST `/api/v1/personnel/view/<PERSONNEL ID>`
