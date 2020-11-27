@@ -68,6 +68,43 @@ router.post(
       });
   }
 );
+router.post(
+  "/update/:id",
+  AuthController.verify_token,
+  AuthController.is_authorized,
+  function (req, res) {
+    if (req.decoded.priority == 3) req.body.companyID = req.decoded.company;
+    company
+      .findOne({ _id: ObjectId(req.body.companyID) })
+      .then(async (matchedCompany) => {
+        console.log();
+        if (!matchedCompany)
+          return res.status(403).json({ message: "Unauthorized" });
+        else {
+          let updatePersonnel = await personnel.findById(req.params.id);
+          updatePersonnel["personnelName"] = req.body.personnelName;
+          updatePersonnel["rank"] = req.body.rank;
+          updatePersonnel["metalNo"] = req.body.metalNo;
+          updatePersonnel["dateOfBirth"] = req.body.dateOfBirth;
+          updatePersonnel.save((err, result) => {
+            if (err)
+              return res.status(500).json({ message: "Internal Server Error" });
+            else {
+              matchedCompany.personnel.push(result._id);
+              matchedCompany.save((err, result) => {
+                if (err)
+                  return res
+                    .status(500)
+                    .json({ message: "Internal Server Error" });
+                else
+                  return res.status(200).json({ message: "Personnel Saved" });
+              });
+            }
+          });
+        }
+      });
+  }
+);
 
 router.delete(
   "/remove",
