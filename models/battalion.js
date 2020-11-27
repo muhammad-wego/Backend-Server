@@ -13,7 +13,10 @@ const battalionSchema = new mongoose.Schema({
     admins:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Admin'
-    }]
+    }],
+    location : {
+        type : String
+    }
 });
 
 module.exports = mongoose.model('Battalion',battalionSchema);

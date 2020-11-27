@@ -24,6 +24,9 @@ const adminSchema = new mongoose.Schema({
     company:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Company'
+    },
+    location : {
+        type : String
     }
 });
 
