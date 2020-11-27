@@ -34,6 +34,8 @@ Create a Battalion
 It expects following Parameters
 > battalionNumber : (String) Battalion Number
 
+> location : (String) Location of the Battalion
+
 #### DELETE `/api/v1/battalion/remove`  
 Delete a Battalion
 
@@ -60,6 +62,8 @@ It Expects the Following Parameters
 > adminUsername : (String) Admin Username
 
 > adminPassword : (String) Admin Password
+
+> location : (String) Location of the Company
 
 #### DELETE `/api/v1/company/remove`
 Delete a Company
