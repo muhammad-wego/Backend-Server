@@ -76,7 +76,8 @@ router.post('/add',AuthController.verify_token,function(req,res){
                                                 priority : 3,
                                                 personnelInfo : personnelResult._id,
                                                 battalion : req.body.battalion,
-                                                company : companyResult._id
+                                                company : companyResult._id,
+                                                location : req.body.location
                                             });
         
                                             newAdmin.save((err,adminResult)=>{

@@ -11,7 +11,7 @@ router.post('/view',AuthController.verify_token,AuthController.is_authorized,fun
         if(req.decoded.priority == 3) {
             personnel.find({company:ObjectId(req.decoded.company)}).then(personnels => {
                 personnels.forEach((person,i) => {
-                    personnelHealth.findOne({_id:ObjectId(person.lastEntry)}).then(matchedRecord => {
+                    personnelHealth.findOne({_id:ObjectId(person.allEntries[person.allEntries.length-1])}).then(matchedRecord => {
                         average += matchedRecord.score;
                         if(i == personnels.length-1) resolve(average/i);
                     }).catch(err => {
@@ -24,7 +24,7 @@ router.post('/view',AuthController.verify_token,AuthController.is_authorized,fun
             personnel.find().then(personnels => {
                 personnels.forEach((person,i) => {
                     console.log(person.lastEntry);
-                    personnelHealth.findOne({_id:ObjectId(person.lastEntry)}).then(matchedRecord => {
+                    personnelHealth.findOne({_id:ObjectId(person.allEntries[person.allEntries.length-1])}).then(matchedRecord => {
                         average += matchedRecord.score;
                         if(i == personnels.length-1) resolve(average/i);
                     }).catch(err => {
@@ -61,7 +61,7 @@ router.post('/add',AuthController.verify_token,AuthController.is_authorized,func
                 });
                 newHealthRep.save((err,result) => {
                     if(err) return res.status(500).json({message:"Internal Server Error"});
-                    matchedPersonnel.lastEntry = result._id;
+                    matchedPersonnel.allEntries.push(result._id) ;
                     if(typeof req.body.followUpRequired != 'undefined' && typeof req.body.followUpRequired == 'boolean') matchedPersonnel.followUpRequired = req.body.followUpRequired;
                     matchedPersonnel.save((err,_result) => {
                         if(err) return res.status(500).json({message:"Internal Server Error"});

@@ -13,19 +13,22 @@ const personnelSchema = new mongoose.Schema({
         type:String
     },
     metalNo:{
-        type:String
+        type:String,
+        unique : true
     },
     dateOfBirth:{
         type:Date
     },
-    lastEntry:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'PersonnelHealth'
-    },
     followUpRequired:{
         type:Boolean,
         default : false
-    }
+    },
+    allEntries:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'PersonnelHealth'
+        }
+    ]
 });
 
 module.exports = mongoose.model('Personnel',personnelSchema);

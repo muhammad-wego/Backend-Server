@@ -34,6 +34,8 @@ Create a Battalion
 It expects following Parameters
 > battalionNumber : (String) Battalion Number
 
+> location : (String) Location of the Battalion
+
 #### DELETE `/api/v1/battalion/remove`  
 Delete a Battalion
 
@@ -61,11 +63,7 @@ It Expects the Following Parameters
 
 > adminPassword : (String) Admin Password
 
-#### DELETE `/api/v1/company/remove`
-Delete a Company
-
-It Expects the Following Parameters
-> companyID : (ObjectId) Company ID
+> location : (String) Location of the Company
 
 #### DELETE `/api/v1/company/remove`
 Delete a Company
@@ -73,6 +71,25 @@ Delete a Company
 It Expects the Following Parameters
 > companyID : (ObjectId) Company ID
 
+#### POST `/api/v1/company/admin/add`
+Adds an Admin to existing Company
+
+It Expects the Following Parameters
+> adminUsername : (String) Username of new admin
+
+> adminPassword : (String) Password of new admin
+
+> personnelID : (ObjectId) ID of the Admin as personnel
+
+> battalion : (ObjectId) ID of the Battalion
+
+> company : (ObjectId) ID of the company
+
+#### DELETE `/api/v1/company/admin/remove`
+Remove an Admin from Company
+
+It Expects the Following Parameters
+> adminID : (ObjectId) ID of the admin to be removed
 
 #### <u>Personnel</u> 
 #### POST `/api/v1/personnel/view/<PERSONNEL ID>`

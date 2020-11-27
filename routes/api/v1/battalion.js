@@ -16,7 +16,8 @@ router.post('/view/:id',AuthController.verify_token,function(req,res){
 router.post('/add',AuthController.verify_token,AuthController.is_authorized,function(req,res){
     if(req.decoded.priority > 1) return res.status(403).json({message:"Unauthorized"});
     let newBattalion = new battalion({
-        battalionNumber : req.body.battalionNumber
+        battalionNumber : req.body.battalionNumber,
+        location : req.body.location
     });
 
     newBattalion.save((err,result)=>{
