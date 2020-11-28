@@ -86,14 +86,18 @@ router.post('/overview',AuthController.verify_token,AuthController.is_authorized
             const HealthParameters = await healthParameter.find();
             let HealthParamStages = new Array();
             for(const Parameter of HealthParameters){
+                let paramObj={
+                    ParameterName:Parameter.name,
+                    stages : new Array(),
+                }
                 for(const Stage of Parameter.stages){
-                    let ParamStageObj = {
-                        ParameterName : Parameter.name,
+                    let stageObj = {
                         StageName : Stage.name,
                         count : 0
                     }
-                    HealthParamStages.push(ParamStageObj);
+                    paramObj.stages.push(stageObj);
                 }
+                HealthParamStages.push(paramObj);
             }
             for(const Personnel of Personnels){
                 const LastReport = await personnelHealth.findOne({_id:ObjectId(Personnel.allEntries[Personnel.allEntries.length - 1])});
@@ -101,9 +105,13 @@ router.post('/overview',AuthController.verify_token,AuthController.is_authorized
                 for(const LReportParameter of LastReport.parameters){
                     const HParameter = await healthParameter.findOne({_id:ObjectId(LReportParameter.healthParameter)});
                     for(const HealthParamStage of HealthParamStages){        
-                        if(HParameter.name == HealthParamStage.ParameterName && LReportParameter.stage == HealthParamStage.StageName){
-                            console.log(HParameter.name,HealthParamStage.ParameterName);
-                            HealthParamStage.count = HealthParamStage.count + 1;
+                        if(HParameter.name == HealthParamStage.ParameterName){
+                            const currentParam = HealthParamStage;
+                            for(const currentStage of currentParam.stages){
+                                if(LReportParameter.stage == currentStage.StageName){
+                                    currentStage.count += 1;
+                                }
+                            }
                         }
                     }
                 }
