@@ -122,7 +122,7 @@ It Expects the Following Parameters
 #### POST `/api/v1/healthParameter/view`
 View Health Parameters Details  
 
-#### POST `/api/v1/healthParameter/view/add`
+#### POST `/api/v1/healthParameter/add`
 Add Health Parameter
 
 It Expects the Following Parameters

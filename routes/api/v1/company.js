@@ -47,7 +47,7 @@ router.post('/add',AuthController.verify_token,function(req,res){
             if(!ObjectId.isValid(req.body.battalion)) return res.status(403).json({message:"Invalid Battalion"});
             let newCompany = new company({
                 companyName:req.body.companyName,
-                battalion:req.body.battalion
+                battalion:ObjectId(req.body.battalion)
             });
         
             newCompany.save((err,companyResult)=>{
