@@ -5,6 +5,18 @@ const personnelHealthSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'Personnel'
     },
+    height : {
+        type : Number,
+        required : true
+    },
+    weight : {
+        type : Number,
+        required : true
+    },
+    bmi : {
+        type : Number,
+        required : true
+    },
     parameters:
         [{
             healthParameter:{

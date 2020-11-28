@@ -23,7 +23,6 @@ router.post('/view',AuthController.verify_token,AuthController.is_authorized,fun
         else {
             personnel.find().then(personnels => {
                 personnels.forEach((person,i) => {
-                    console.log(person.lastEntry);
                     personnelHealth.findOne({_id:ObjectId(person.allEntries[person.allEntries.length-1])}).then(matchedRecord => {
                         average += matchedRecord.score;
                         if(i == personnels.length-1) resolve(average/i);
@@ -48,6 +47,9 @@ router.post('/add',AuthController.verify_token,AuthController.is_authorized,func
                 let newHealthRep = new personnelHealth({
                     personnel : matchedPersonnel._id,
                     dateOfEntry : new Date().getTime(),
+                    weight : req.body.weight,
+                    height : req.body.height,
+                    bmi : (Number(req.body.weight)/(Number(req.body.height) * Number(req.body.height))),
                     score : 10
                 });
                 req.body.parameters.forEach((param,i)=>{
