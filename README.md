@@ -144,3 +144,8 @@ Remove Health Parameter
 
 It Expects the Following Parameters
 > healthParamID : (ObjectID) ID Of Param to Delete
+#### POST `/api/v1/health/overview`
+Remove Health Parameter
+
+It Expects the Following Parameters
+> company : (ObjectID) ID Of Company to be viewed
