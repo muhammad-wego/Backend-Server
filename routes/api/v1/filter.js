@@ -8,11 +8,14 @@ router.post('/:type/:healthParam/:query',AuthController.verify_token,AuthControl
     record.find({parameters:{$elemMatch:{healthParameter:ObjectId(req.params.healthParam)}}}).then(records => {
         let response = [];
         records.forEach((currentRecord,i) => {
-            if(currentRecord.parameters[req.params.type] == req.params.query)
-                response.push(currentRecord);
+            currentRecord.parameters.forEach((param,j)=>{
+                if(param[req.params.type] == req.params.query)
+                    response.push(currentRecord);
+            });
         });
         return res.status(200).json({records:response});
     }).catch(err => {
+        console.log(err);
         return res.status(500).json({message : "Internal Server Error"});
     })
 });
