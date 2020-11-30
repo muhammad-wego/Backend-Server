@@ -74,7 +74,7 @@ router.post('/:type/:healthParam/:query',AuthController.verify_token,AuthControl
             await getForm(formID).then((_form)=>{
                 if(_form != null)
                 _form.parameters.forEach((param,i)=>{
-                    if(param.healthParameter==req.params.healthParam){
+                    if(param.healthParameter==req.params.healthParam && (param[req.params.type] == req.params.query)){
                         response.push(_form.personnel);
                     }
                 })
