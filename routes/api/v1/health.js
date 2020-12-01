@@ -134,7 +134,6 @@ router.post('/compare', AuthController.verify_token, AuthController.is_authorize
             let comparisonArr = new Array();
             for(const currParam of currentRecord.parameters){
                 for(const prevParam of prevRecord.parameters){
-                    console.log(currParam.healthParameter,prevParam.healthParameter)
                     if(String(currParam.healthParameter) == String(prevParam.healthParameter)){
                         const HealthParameter = await healthParameter.findOne({_id:ObjectId(currParam.healthParameter)});
                         ComparissonObj = {
@@ -156,7 +155,6 @@ router.post('/compare', AuthController.verify_token, AuthController.is_authorize
                 }
             }
             let scoreChange = currentRecord.score - prevRecord.score;
-            console.log(comparisonArr);
             return res.status(200).json({
                 Comparisons:comparisonArr,
                 scoreChange
