@@ -27,7 +27,7 @@ View Battalion Details
 
 > `<BATTALION ID>` expects ObjectId of Battalion 
 Pass `all` in `<COMPANY ID>` to view all battalions details
-
+    
 #### POST `/api/v1/battalion/add`
 Create a Battalion
 
