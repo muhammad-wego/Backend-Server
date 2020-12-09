@@ -18,7 +18,7 @@ router.post('/',function(req,res){
 
             newAdmin.save((err,result)=>{
                 if(err) res.status(500).json({message:"Registration Failed"});
-                else res.status(200).json({message:"Registration Successfully"});
+                else res.status(200).json({message:"Registration Successfull"});
             });
         }
     });

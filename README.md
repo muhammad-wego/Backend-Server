@@ -122,7 +122,7 @@ It Expects the Following Parameters
 #### POST `/api/v1/healthParameter/view`
 View Health Parameters Details  
 
-#### POST `/api/v1/healthParameter/view/add`
+#### POST `/api/v1/healthParameter/add`
 Add Health Parameter
 
 It Expects the Following Parameters
@@ -144,3 +144,8 @@ Remove Health Parameter
 
 It Expects the Following Parameters
 > healthParamID : (ObjectID) ID Of Param to Delete
+#### POST `/api/v1/health/overview`
+Overview of a company
+
+It Expects the Following Parameters
+> company : (ObjectID) ID Of Company to be viewed
