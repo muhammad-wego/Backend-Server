@@ -230,11 +230,32 @@ AuthController.is_authorized,
 async function (req, res){
   try{
     if(req.decoded.priority<3 || req.decoded.company == req.body.company){
-      const Peronnels = await personnel.find({company:ObjectId(req.body.company)})
-      let personnelsArr = new Array();
+      const Personnels = await personnel.find({company:ObjectId(req.body.company)})
+      let individualInfoArr = new Array();
       for(const p of Personnels){
-        //TO BE DONE
+        const lastRecord = await personnelHealth.findOne({_id:ObjectId(p.allEntries[p.allEntries.length-1])});
+        let weight,height,score;
+        if(!lastRecord) {
+           weight = "No records";
+           height = "No records";
+           score = "No records";
+        }
+        else{
+          weight = lastRecord.weight;
+          height = lastRecord.height;
+          score = lastRecord.score
+        }
+        const individualInfoObj = {
+          metalNo:p.metalNo,
+          Name:p.Name,
+          Weight : weight,
+          height : height,
+          Company : p.company,
+          Score : score          
+        };
+        individualInfoArr.push(individualInfoObj);
       }
+      res.status(200).json({individualInfoArr});
     }
   }catch(err){
     console.log(err);
