@@ -122,4 +122,59 @@ router.post(
     }
   );
 
+  router.post("/individualOverview",
+AuthController.verify_token,
+AuthController.is_authorized,
+async function (req, res){
+  try{
+    
+    const adminCompany = company.findOne({_id:ObjectId(req.decoded.company)});
+    if ((req.decoded.priority === 2 && adminCompany.battalion == req.body.battalion) || req.decoded.priority < 2) {
+      const Battalion = await battalion.findOne({_id:ObjectId(req.body.battalion)});
+      if(!Battalion) return res.status(400).json({message:"No such battalion"});
+
+      let Personnels = new Array();
+      for(const cmpnyId of Battalion.companies){
+        const cmpny = await company.findOne({_id:ObjectId(cmpnyId)});
+        if(!cmpny) continue;
+        for(const pId of cmpny.personnel){
+            const p = await personnel.findOne({_id:ObjectId(pId)});
+            if(!p) continue
+            Personnels.push(p);
+        }
+      }
+
+
+      let individualInfoArr = new Array();
+      for(const p of Personnels){
+        const lastRecord = await personnelHealth.findOne({_id:ObjectId(p.allEntries[p.allEntries.length-1])});
+        let weight,height,score;
+        if(!lastRecord) {
+           weight = "No records";
+           height = "No records";
+           score = "No records";
+        }
+        else{
+          weight = lastRecord.weight;
+          height = lastRecord.height;
+          score = lastRecord.score
+        }
+        const individualInfoObj = {
+          metalNo:p.metalNo,
+          Name:p.Name,
+          Weight : weight,
+          height : height,
+          Company : p.company,
+          Score : score          
+        };
+        individualInfoArr.push(individualInfoObj);
+      }
+      res.status(200).json({individualInfoArr});
+    }
+  }catch(err){
+    console.log(err);
+    return res.status(500).json({message:"Internal Server Error",err});
+  }
+}); 
+
 module.exports = router;
