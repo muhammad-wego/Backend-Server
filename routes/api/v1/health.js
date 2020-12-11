@@ -143,71 +143,7 @@ router.post(
   }
 );
 
-router.post(
-  "/overview",
-  AuthController.verify_token,
-  AuthController.is_authorized,
-  async function (req, res) {
-    if (!req.body.company) {
-      req.body.company = req.decoded.company;
-    }
-    try {
-      if (req.decoded.priority === 3 || req.decoded.priority < 3) {
-        const Company = await company.findOne({
-          _id: ObjectId(req.body.company),
-        });
-        if (!Company)
-          return res.status(400).json({ message: "No Company Found" });
-        const Personnels = await personnel.find({
-          company: ObjectId(req.body.company),
-        });
-        const HealthParameters = await healthParameter.find();
-        let HealthParamStages = new Array();
-        for (const Parameter of HealthParameters) {
-          let paramObj = {
-            ParameterName: Parameter.name,
-            stages: new Array(),
-          };
-          for (const Stage of Parameter.stages) {
-            let stageObj = {
-              StageName: Stage.name,
-              count: 0,
-            };
-            paramObj.stages.push(stageObj);
-          }
-          HealthParamStages.push(paramObj);
-        }
-        for (const Personnel of Personnels) {
-          const LastReport = await personnelHealth.findOne({
-            _id: ObjectId(
-              Personnel.allEntries[Personnel.allEntries.length - 1]
-            ),
-          });
-          if (!LastReport) continue;
-          for (const LReportParameter of LastReport.parameters) {
-            const HParameter = await healthParameter.findOne({
-              _id: ObjectId(LReportParameter.healthParameter),
-            });
-            for (const HealthParamStage of HealthParamStages) {
-              if (HParameter.name == HealthParamStage.ParameterName) {
-                const currentParam = HealthParamStage;
-                for (const currentStage of currentParam.stages) {
-                  if (LReportParameter.stage == currentStage.StageName) {
-                    currentStage.count += 1;
-                  }
-                }
-              }
-            }
-          }
-        }
-        return res.status(200).json({ HealthParamStages });
-      }
-    } catch (err) {
-      console.log(err);
-      return res.status(403).json({ message: "Internal Server Error" });
-    }
-  }
-);
+
 
 router.post(
   "/compare",
@@ -287,7 +223,7 @@ router.post(
         if (entries.allEntries.length < 1)
           return res.status(404).json({ message: "No Previous Entries Found" });
 
-        let LatestEntry = entries.allEntries.pop();
+        let LatestEntry = entries.allEntries.pop(); 
         personnelHealth
           .findOne({ _id: ObjectId(LatestEntry) })
           .then(async (lastEntry) => {
@@ -305,8 +241,8 @@ router.post(
             //         .json({ message: "No Parameter Found" });
             //     });
             // }
-
-            return res.status(200).json({ lastEntry });
+            const previousEntries = entries.allEntries;
+            return res.status(200).json({ lastEntry,previousEntries });
           })
           .catch((err) => {
             return res.status(500).json({ message: "Internal Server Error" });
