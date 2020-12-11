@@ -5,6 +5,8 @@ const ObjectId = require('mongodb').ObjectId;
 const AuthController = require('../../../contollers/AuthController');
 const company = require('../../../models/company');
 const personnel = require('../../../models/personnel');
+const healthParameter = require('../../../models/healthParameter');
+const personnelHealth = require('../../../models/personnelHealth');
 
 router.post('/view/:id',AuthController.verify_token,function(req,res){
     if(req.params.id == 'all')
@@ -57,8 +59,10 @@ router.post(
           }
           for(const cmpnyId of Battalion.companies){
             const cmpny = await company.findOne({_id:ObjectId(cmpnyId)});
+            if(!cmpny) continue;
             for(const pId of cmpny.personnel){
                 const p = await personnel.findOne({_id:ObjectId(pId)});
+                if(!p) continue
                 Personnels.push(p);
             }
           }
