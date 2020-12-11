@@ -159,6 +159,11 @@ router.post(
         const Company = await company.findOne({
           _id: ObjectId(req.body.company),
         });
+        let personnelScoresObj = {
+          poor:0,
+          medium:0,
+          good:0
+        }
         if (!Company)
           return res.status(400).json({ message: "No Company Found" });
         const Personnels = await personnel.find({
@@ -187,6 +192,11 @@ router.post(
             ),
           });
           if (!LastReport) continue;
+
+          if(LastReport.score < 4) personnelScoresObj.poor+=1;
+          else if(LastReport.score >= 4 && LastReport.score < 7) personnelScoresObj.medium+=1;
+          else personnelScoresObj.good+=1;
+
           for (const LReportParameter of LastReport.parameters) {
             const HParameter = await healthParameter.findOne({
               _id: ObjectId(LReportParameter.healthParameter),
@@ -204,7 +214,7 @@ router.post(
           }
         }
 
-        return res.status(200).json({ HealthParamStages });
+        return res.status(200).json({ HealthParamStages,personnelScoresObj });
       }
       else return res.status(401).json({message:"Unauthorized"});
     } catch (err) {

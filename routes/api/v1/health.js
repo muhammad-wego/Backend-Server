@@ -223,7 +223,7 @@ router.post(
         if (entries.allEntries.length < 1)
           return res.status(404).json({ message: "No Previous Entries Found" });
 
-        let LatestEntry = entries.allEntries[entries.allEntries.length-1]; 
+        let LatestEntry = entries.allEntries.pop(); 
         personnelHealth
           .findOne({ _id: ObjectId(LatestEntry) })
           .then(async (lastEntry) => {
@@ -241,8 +241,8 @@ router.post(
             //         .json({ message: "No Parameter Found" });
             //     });
             // }
-            const AllEntries = entries.allEntries;
-            return res.status(200).json({ lastEntry,AllEntries });
+            const previousEntries = entries.allEntries;
+            return res.status(200).json({ lastEntry,previousEntries });
           })
           .catch((err) => {
             return res.status(500).json({ message: "Internal Server Error" });
