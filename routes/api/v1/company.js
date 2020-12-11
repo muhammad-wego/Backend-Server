@@ -224,4 +224,22 @@ router.post(
   }
 );
 
+router.post("/individualOverview",
+AuthController.verify_token,
+AuthController.is_authorized,
+async function (req, res){
+  try{
+    if(req.decoded.priority<3 || req.decoded.company == req.body.company){
+      const Peronnels = await personnel.find({company:ObjectId(req.body.company)})
+      let personnelsArr = new Array();
+      for(const p of Personnels){
+        //TO BE DONE
+      }
+    }
+  }catch(err){
+    console.log(err);
+    return res.status(500).json({message:"Internal Server Error",err});
+  }
+}); 
+
 module.exports = router;
