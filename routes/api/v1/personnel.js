@@ -5,6 +5,7 @@ const company = require("../../../models/company");
 const ObjectId = require("mongodb").ObjectId;
 const AuthController = require("../../../contollers/AuthController");
 const {  startSession } = require("mongoose");
+const admin = require("../../../models/admin");
 
 router.post(
   "/view/:id",
@@ -187,7 +188,12 @@ async function (req, res){
       if(!Company) return res.status(400).json({message:"Invalid Company Id"});
       const Personnel = await personnel.findOne({_id:ObjectId(req.body.personnelId)});
       const oldCompany = await company.findOne({_id:ObjectId(Personnel.company)});
-      console.log(oldCompany);
+      const Admin = await admin.findOne({personnelInfo:Personnel._id})
+      if(Admin){
+        //check if Personnel is an admin of the old company
+        //strip admin rights first
+        await admin.deleteOne({_id:Admin._id});
+      }
       //remove from old company
       let oldCompanyPersonnels = oldCompany.personnel; 
       for(let i = 0;i < oldCompanyPersonnels.length;i++){
@@ -196,7 +202,6 @@ async function (req, res){
         }
       }
       //add to new company
-      console.log(Company);
       let newCompanyPersonnels = Company.personnel;
       newCompanyPersonnels.push(Personnel._id); 
 

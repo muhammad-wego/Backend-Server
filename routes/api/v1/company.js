@@ -1,6 +1,5 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const { findOne } = require("../../../models/battalion);
 const company = require("../../../models/company");
 const battalion = require("../../../models/battalion");
 const admin = require("../../../models/admin");
@@ -194,20 +193,18 @@ router.post("/add", AuthController.verify_token, function (req, res) {
                             }
                           });
                         }
-                      }
-                    );
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
-    })
-    .catch((err) => {
-      console.log("Error Fetching Battalion : " + err);
-      return res.status(500).json({ message: "Internal Server Error" });
-    });
+                      });
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+    }).catch(err => {
+    console.log("Error Fetching Battalion : " + err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  })
 });
 
 router.delete("/remove", AuthController.verify_token, function (req, res) {
@@ -229,51 +226,36 @@ router.delete("/remove", AuthController.verify_token, function (req, res) {
     });
 });
 
-router.post(
-  "/admin/add",
-  AuthController.verify_token,
-  AuthController.is_authorized,
-  function (req, res) {
-    if (req.decoded.priority > 2)
-      return res.status(403).json({ message: "Unauthorized" });
-    bcrypt.hash(req.body.adminPassword, 10, function (err, hash) {
-      if (err)
-        return res.status(500).json({ message: "Internal Server Error" });
-      else {
-        let newAdmin = new admin({
-          username: req.body.adminUsername,
-          password: hash,
-          priority: 3,
-          personnelInfo: req.body.personnelID,
-          battalion: req.body.battalion,
-          company: req.body.company,
-        });
+router.post('/admin/add', AuthController.verify_token, AuthController.is_authorized, function (req, res) {
+  if (req.decoded.priority > 2) return res.status(403).json({ message: "Unauthorized" });
+  bcrypt.hash(req.body.adminPassword, 10, function (err, hash) {
+    if (err) return res.status(500).json({ message: "Internal Server Error" });
+    else {
+      let newAdmin = new admin({
+        username: req.body.adminUsername,
+        password: hash,
+        priority: 3,
+        personnelInfo: req.body.personnelID,
+        battalion: req.body.battalion,
+        company: req.body.company
+      });
 
-        newAdmin.save((err, result) => {
-          console.log(err);
-          if (err)
-            return res.status(500).json({ message: "Internal Server Error" });
-          else return res.status(200).json({ message: "Admin Added" });
-        });
-      }
-    });
-  }
-);
+      newAdmin.save((err, result) => {
+        console.log(err);
+        if (err) return res.status(500).json({ message: "Internal Server Error" });
+        else return res.status(200).json({ message: "Admin Added" });
+      });
+    }
+  })
+});
 
-router.delete(
-  "/admin/remove",
-  AuthController.verify_token,
-  AuthController.is_authorized,
-  function (req, res) {
-    if (req.decoded.priority > 2)
-      return res.status(403).json({ message: "Unauthorized" });
-    admin.deleteOne({ _id: ObjectId(req.body.adminID) }, (err, result) => {
-      if (err)
-        return res.status(500).json({ message: "Internal Server Error" });
-      return res.status(200).json({ message: "Admin Removed" });
-    });
-  }
-);
+router.delete('/admin/remove', AuthController.verify_token, AuthController.is_authorized, function (req, res) {
+  if (req.decoded.priority > 2) return res.status(403).json({ message: "Unauthorized" });
+  admin.deleteOne({ _id: ObjectId(req.body.adminID) }, (err, result) => {
+    if (err) return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(200).json({ message: "Admin Removed" });
+  });
+});
 
 router.post(
   "/overview",
@@ -284,21 +266,15 @@ router.post(
       req.body.company = req.decoded.company;
     }
     try {
-      if (
-        (req.decoded.priority === 3 &&
-          req.decoded.company == req.body.company) ||
-        req.decoded.priority < 3
-      ) {
+      if ((req.decoded.priority === 3 && req.decoded.company == req.body.company) || req.decoded.priority < 3) {
         const Company = await company.findOne({
           _id: ObjectId(req.body.company),
         });
         let personnelScoresObj = {
           poor: 0,
           medium: 0,
-
           good: 0
         }
-        };
         if (!Company)
           return res.status(400).json({ message: "No Company Found" });
         const Personnels = await personnel.find({
@@ -329,10 +305,7 @@ router.post(
           if (!LastReport) continue;
 
           if (LastReport.score < 4) personnelScoresObj.poor += 1;
-
-          else if (LastReport.score >= 4 && LastReport.score < 7)
-            personnelScoresObj.medium += 1;
-
+          else if (LastReport.score >= 4 && LastReport.score < 7) personnelScoresObj.medium += 1;
           else personnelScoresObj.good += 1;
 
           for (const LReportParameter of LastReport.parameters) {
@@ -355,7 +328,8 @@ router.post(
         }
 
         return res.status(200).json({ HealthParamStages, personnelScoresObj });
-      } else return res.status(401).json({ message: "Unauthorized" });
+      }
+      else return res.status(401).json({ message: "Unauthorized" });
     } catch (err) {
       console.log(err);
       return res.status(500).json({ message: "Internal Server Error" });
@@ -363,8 +337,7 @@ router.post(
   }
 );
 
-router.post(
-  "/individualOverview",
+router.post("/individualOverview",
   AuthController.verify_token,
   AuthController.is_authorized,
   async function (req, res) {
@@ -504,7 +477,7 @@ router.get("/showPersonnels",
       if(req.decoded.priority<2 || (req.decoded.priority == 2 && adminCompany.battalion == Company.battalion)){
         const Admin = await admin.findOne({_id:ObjectId(req.body.adminId)});
         if(!Admin) return res.status(401).json({message:"Incorrect Admin Id"});
-        if(String(Admin.company)!=String(req.body.company)) {console.log(Admin.company,req.body.company);return res.status(401).json({message:"Cannot Process Request as Admin is not from requested company"});}
+        if(String(Admin.company)!=String(req.body.company)) {return res.status(401).json({message:"Cannot Process Request as Admin is not from requested company"});}
         try{
           await admin.deleteOne({_id:ObjectId(req.body.adminId)});
           res.status(200).json({message:"Admin status of personnel removed successfully"});
