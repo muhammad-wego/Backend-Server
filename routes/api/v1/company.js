@@ -9,112 +9,157 @@ const personnelHealth = require("../../../models/personnelHealth");
 const bcrypt = require("bcrypt");
 const ObjectId = require("mongodb").ObjectId;
 const AuthController = require("../../../contollers/AuthController");
+const { findOne } = require("../../../models/admin");
 
-router.post("/view/:id", AuthController.verify_token, function (req, res) {
-  if (req.params.id == "all") {
-    let response = { companies: [] };
-    const companyProm = new Promise((resolve, reject) => {
-      company
-        .find()
-        .then((companies) => {
-          companies.forEach((com, i) => {
-            admin
-              .find({ company: com._id })
-              .then((admins) => {
-                com = com.toJSON();
-                com.admins = [];
-                admins.forEach((admin, i) => {
-                  admin = admin.toJSON();
-                  delete admin.password;
-                  com.admins.push(admin);
-                });
-                response.companies.push(com);
-                resolve(response);
-              })
-              .catch((err) => {
-                return res
-                  .status(500)
-                  .json({ message: "Internal Server Error" });
-              });
+router.post(
+  "/view/:id",
+  AuthController.verify_token,
+  async function (req, res) {
+    if (req.params.id == "all") {
+      let response = { companies: [] };
+      let companies = await company.find();
+
+      if (!companies) {
+        return res.status(500).json({ message: "Internal Server Error" });
+      }
+
+      for (let comp of companies) {
+        let compadmin = await admin.find({ company: comp._id });
+        if (!compadmin) {
+        } else {
+          comp = comp.toJSON();
+          comp.admins = [];
+          compadmin.forEach((admin, i) => {
+            admin = admin.toJSON();
+            delete admin.password;
+            comp.admins.push(admin);
           });
+          response.companies.push(comp);
+        }
+      }
+
+      return res.status(200).send(response);
+
+      // const companyProm = new Promise((resolve, reject) => {
+      //   company
+      //     .find()
+      //     .then(async (companies) => {
+      //       companies.forEach((com, i) => {
+      //         admin
+      //           .find({ company: com._id })
+      //           .then((admins) => {
+      //             com = com.toJSON();
+      //             com.admins = [];
+      //             admins.forEach((admin, i) => {
+      //               admin = admin.toJSON();
+      //               delete admin.password;
+      //               com.admins.push(admin);
+      //             });
+      //             response.companies.push(com);
+      //             resolve(response);
+      //           })
+      //           .catch((err) => {
+      //             return res
+      //               .status(500)
+      //               .json({ message: "Internal Server Error" });
+      //           });
+      //       });
+      //     })
+      //     .catch((err) => {
+      //       return res.status(500).json({ message: "Internal Server Error" });
+      //     });
+      // }).then((resp) => {
+      //   return res.status(200).send(resp);
+      // });
+    } else
+      company
+        .findOne({ _id: req.params.id })
+        .then((matchedCompany) => {
+          admin
+            .find({ company: matchedCompany._id })
+            .then((admins) => {
+              return res.status(200).json({ company: matchedCompany, admins });
+            })
+            .catch((err) => {
+              return res.status(500).json({ message: "Internal Server Error" });
+            });
         })
         .catch((err) => {
           return res.status(500).json({ message: "Internal Server Error" });
         });
-    }).then((resp) => {
-      return res.status(200).send(resp);
-    });
-  } else
-    company
-      .findOne({ _id: req.params.id })
-      .then((matchedCompany) => {
-        admin
-          .find({ company: matchedCompany._id })
-          .then((admins) => {
-            return res.status(200).json({ company: matchedCompany, admins });
-          })
-          .catch((err) => {
-            return res.status(500).json({ message: "Internal Server Error" });
-          });
-      })
-      .catch((err) => {
-        return res.status(500).json({ message: "Internal Server Error" });
-      });
-});
+  }
+);
 
 router.post("/add", AuthController.verify_token, function (req, res) {
   if (req.decoded.priority > 2)
     return res.status(403).json({ message: "Unauthorized" });
   battalion
     .findOne({ _id: ObjectId(req.body.battalion) })
-    .then((matchedBattalion) => {
+    .then(async (matchedBattalion) => {
       if (!matchedBattalion)
         return res.status(403).json({ message: "Unauthorized" });
       else {
         if (!ObjectId.isValid(req.body.battalion))
           return res.status(403).json({ message: "Invalid Battalion" });
+
+        let duplicate = await company.findOne({
+          companyName: req.body.companyName,
+        });
+        if (duplicate) {
+          console.log("duplicated");
+          return res.status(409).json({
+            message: `Company ${req.body.companyName} Already Exists`,
+          });
+        }
         let newCompany = new company({
           companyName: req.body.companyName,
           battalion: ObjectId(req.body.battalion),
         });
 
         newCompany.save((err, companyResult) => {
-          if (err)
+          if (err) {
+            console.log(err);
             return res.status(500).json({ message: "Internal Server Error" });
-          else {
+          } else {
             matchedBattalion.companies.push(companyResult._id);
             matchedBattalion.save((err, battalionResult) => {
-              if (err)
+              if (err) {
+                console.log(err);
                 return res
                   .status(500)
                   .json({ message: "Internal Server Error" });
-              else {
+              } else {
                 let newPersonnel = new personnel({
                   personnelName: req.body.adminName,
                   company: companyResult._id,
+                  metalNo: req.body.adminName,
                 });
 
                 newPersonnel.save((err, personnelResult) => {
-                  if (err)
+                  if (err) {
+                    console.log(err);
                     return res
                       .status(500)
                       .json({ message: "Internal Server Error" });
-                  else {
+                  } else {
                     bcrypt.hash(
                       req.body.adminPassword,
                       10,
                       function (err, hash) {
-                        if (err)
+                        if (err) {
+                          console.log(err);
                           return res
                             .status(500)
                             .json({ message: "Internal Server Error" });
-                        else {
+                        } else {
                           companyResult.personnel.push(personnelResult._id);
                           companyResult.save((err, result) => {
-                            if (err)
+                            if (err) {
+                              console.log(err);
                               return res
                                 .status(500)
                                 .json({ message: "Internal Server Error" });
+                            }
                           });
                           let newAdmin = new admin({
                             username: req.body.adminUsername,
@@ -127,17 +172,20 @@ router.post("/add", AuthController.verify_token, function (req, res) {
                           });
 
                           newAdmin.save((err, adminResult) => {
-                            if (err)
+                            if (err) {
+                              console.log(err);
                               return res
                                 .status(500)
                                 .json({ message: "Internal Server Error" });
-                            else {
+                            } else {
                               companyResult.personnel.push(adminResult._id);
                               companyResult.save((err, result) => {
-                                if (err)
+                                if (err) {
+                                  console.log(err);
                                   return res
                                     .status(500)
                                     .json({ message: "Internal Server Error" });
+                                }
                                 return res
                                   .status(200)
                                   .json({ message: "Company Created" });
@@ -164,10 +212,20 @@ router.post("/add", AuthController.verify_token, function (req, res) {
 router.delete("/remove", AuthController.verify_token, function (req, res) {
   if (req.decoded.priority > 2)
     return res.status(403).json({ message: "Unauthorized" });
-  company.deleteOne({ _id: ObjectId(req.body.companyID) }, (err, result) => {
-    if (err) return res.status(500).json({ message: "Internal Server Error" });
-    else return res.status(200).json({ message: "Company Removed" });
-  });
+
+  personnel
+    .deleteMany({ company: ObjectId(req.body.companyID) }, (err, result) => {
+      if (err) res.status(500).json({ message: "Internal Server Error" });
+
+      company.deleteOne({ _id: ObjectId(req.body.company) }, (err, result) => {
+        console.log(result);
+        if (err) res.status(500).json({ message: "Internal Server Error" });
+        return res.status(200).json({ message: "Company Deleted" });
+      });
+    })
+    .catch((err) => {
+      if (err) console.log(err);
+    });
 });
 
 router.post(
@@ -276,12 +334,14 @@ router.post(
             const HParameter = await healthParameter.findOne({
               _id: ObjectId(LReportParameter.healthParameter),
             });
-            for (const HealthParamStage of HealthParamStages) {
-              if (HParameter.name == HealthParamStage.ParameterName) {
-                const currentParam = HealthParamStage;
-                for (const currentStage of currentParam.stages) {
-                  if (LReportParameter.stage == currentStage.StageName) {
-                    currentStage.count += 1;
+            if (HParameter) {
+              for (const HealthParamStage of HealthParamStages) {
+                if (HParameter.name == HealthParamStage.ParameterName) {
+                  const currentParam = HealthParamStage;
+                  for (const currentStage of currentParam.stages) {
+                    if (LReportParameter.stage == currentStage.StageName) {
+                      currentStage.count += 1;
+                    }
                   }
                 }
               }
@@ -293,7 +353,7 @@ router.post(
       } else return res.status(401).json({ message: "Unauthorized" });
     } catch (err) {
       console.log(err);
-      return res.status(403).json({ message: "Internal Server Error" });
+      return res.status(500).json({ message: "Internal Server Error" });
     }
   }
 );
