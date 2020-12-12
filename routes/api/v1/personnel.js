@@ -7,28 +7,45 @@ const AuthController = require("../../../contollers/AuthController");
 const {  startSession } = require("mongoose");
 const admin = require("../../../models/admin");
 
-router.post("/view/:id", AuthController.verify_token, function (req, res) {
-  if (req.params.id == "all") {
-    //if(req.decoded.priority == 1)
-    personnel
-      .find()
-      .then((personnels) => {
-        return res.status(200).json({ personnels });
-      })
-      .catch((err) => {
-        return res.status(500).json({ message: "Internal Server Error" });
-      });
-    // return res.status(403).json({message:"Unauthorized"});
-  } else
-    personnel
-      .findOne({ _id: req.params.id })
-      .then((matchedPersonnel) => {
-        return res.status(200).json({ personnel: matchedPersonnel });
-      })
-      .catch((err) => {
-        return res.status(500).json({ message: "Internal Server Error" });
-      });
-});
+router.post(
+  "/view/:id",
+  AuthController.verify_token,
+  AuthController.is_authorized,
+  function (req, res) {
+    if (req.params.id == "all") {
+      if (req.decoded.priority == 1) {
+        personnel
+          .find()
+          .then((personnels) => {
+            return res.status(200).json({ personnels });
+          })
+          .catch((err) => {
+            return res.status(500).json({ message: "Internal Server Error" });
+          });
+      } else {
+        personnel
+          .find({ company: req.decoded.company })
+          .then((personnels) => {
+            return res.status(200).json({ personnels });
+          })
+          .catch((err) => {
+            return res.status(500).json({ message: "Internal Server Error" });
+          });
+      }
+      //if(req.decoded.priority == 1)
+
+      // return res.status(403).json({message:"Unauthorized"});
+    } else
+      personnel
+        .findOne({ _id: req.params.id })
+        .then((matchedPersonnel) => {
+          return res.status(200).json({ personnel: matchedPersonnel });
+        })
+        .catch((err) => {
+          return res.status(500).json({ message: "Internal Server Error" });
+        });
+  }
+);
 
 router.post(
   "/add",
@@ -52,9 +69,10 @@ router.post(
           });
 
           newPersonnel.save((err, result) => {
-            if (err)
+            if (err) {
+              console.log(err);
               return res.status(500).json({ message: "Internal Server Error" });
-            else {
+            } else {
               matchedCompany.personnel.push(result._id);
               matchedCompany.save((err, result) => {
                 if (err)

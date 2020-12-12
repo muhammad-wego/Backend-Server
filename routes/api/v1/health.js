@@ -78,72 +78,72 @@ router.post(
   }
 );
 
-router.post(
-  "/add",
-  AuthController.verify_token,
-  AuthController.is_authorized,
-  function (req, res) {
-    if (!ObjectId.isValid(req.body.personnelID))
-      return res.status(403).json({ message: "Invalid Personnel" });
-    personnel
-      .findOne({ _id: ObjectId(req.body.personnelID) })
-      .then((matchedPersonnel) => {
-        if (!matchedPersonnel)
-          return res.status(403).json({ message: "Unauthorized" });
-        else {
-          if (
-            req.decoded.priority < 3 ||
-            req.decoded.company == matchedPersonnel.company
-          ) {
-            let newHealthRep = new personnelHealth({
-              personnel: matchedPersonnel._id,
-              dateOfEntry: new Date().getTime(),
-              score: 10,
-            });
-            req.body.parameters.forEach((param, i) => {
-              if (!ObjectId.isValid(param.healthParameter))
-                return res.status(403).json({ message: "Unauthorized" });
-              let currentParam = {};
-              currentParam.healthParameter = param.healthParameter;
-              if (typeof req.body.stage != "undefined")
-                currentParam.stage = param.stage;
-              if (typeof req.body.value != "undefined")
-                currentParam.value = param.value;
-              if (typeof req.body.presence != "undefined")
-                currentParam.presence = param.presence;
-              newHealthRep.parameters.push(currentParam);
-            });
-            newHealthRep.save((err, result) => {
-              if (err)
-                return res
-                  .status(500)
-                  .json({ message: "Internal Server Error" });
-              matchedPersonnel.allEntries.push(result._id);
-              if (
-                typeof req.body.followUpRequired != "undefined" &&
-                typeof req.body.followUpRequired == "boolean"
-              )
-                matchedPersonnel.followUpRequired = req.body.followUpRequired;
-              matchedPersonnel.save((err, _result) => {
-                if (err)
-                  return res
-                    .status(500)
-                    .json({ message: "Internal Server Error" });
-                return res
-                  .status(200)
-                  .json({ message: "Health Record Created" });
-              });
-            });
-          } else return res.status(403).json({ message: "Unauthorized" });
-        }
-      })
-      .catch((err) => {
-        return res.status(500).json({ message: "Internal Server Error" });
-      });
-  }
-);
-
-
+// router.post(
+//   "/add",
+//   AuthController.verify_token,
+//   AuthController.is_authorized,
+//   function (req, res) {
+//     if (!ObjectId.isValid(req.body.personnelID))
+//       return res.status(403).json({ message: "Invalid Personnel" });
+//     personnel
+//       .findOne({ _id: ObjectId(req.body.personnelID) })
+//       .then((matchedPersonnel) => {
+//         console.log(matchedPersonnel);
+//         if (!matchedPersonnel)
+//           return res.status(403).json({ message: "Unauthorized 1" });
+//         else {
+//           if (
+//             req.decoded.priority < 3 ||
+//             String(req.decoded.company) == String(matchedPersonnel.company)
+//           ) {
+//             let newHealthRep = new personnelHealth({
+//               personnel: matchedPersonnel._id,
+//               dateOfEntry: new Date().getTime(),
+//               score: 10,
+//             });
+//             req.body.parameters.forEach((param, i) => {
+//               if (!ObjectId.isValid(param.healthParameter))
+//                 return res.status(403).json({ message: "Unauthorized 2" });
+//               let currentParam = {};
+//               currentParam.healthParameter = param.healthParameter;
+//               if (typeof req.body.stage != "undefined")
+//                 currentParam.stage = param.stage;
+//               if (typeof req.body.value != "undefined")
+//                 currentParam.value = param.value;
+//               if (typeof req.body.presence != "undefined")
+//                 currentParam.presence = param.presence;
+//               newHealthRep.parameters.push(currentParam);
+//             });
+//             newHealthRep.save((err, result) => {
+//               console.log(err);
+//               if (err)
+//                 return res
+//                   .status(500)
+//                   .json({ message: "Internal Server Error 1" });
+//               matchedPersonnel.allEntries.push(result._id);
+//               if (
+//                 typeof req.body.followUpRequired != "undefined" &&
+//                 typeof req.body.followUpRequired == "boolean"
+//               )
+//                 matchedPersonnel.followUpRequired = req.body.followUpRequired;
+//               matchedPersonnel.save((err, _result) => {
+//                 if (err)
+//                   return res
+//                     .status(500)
+//                     .json({ message: "Internal Server Error 2" });
+//                 return res
+//                   .status(200)
+//                   .json({ message: "Health Record Created" });
+//               });
+//             });
+//           } else return res.status(403).json({ message: "Unauthorized 3" });
+//         }
+//       })
+//       .catch((err) => {
+//         return res.status(500).json({ message: "Internal Server Error 3" });
+//       });
+//   }
+// );
 
 router.post(
   "/compare",
@@ -223,7 +223,7 @@ router.post(
         if (entries.allEntries.length < 1)
           return res.status(404).json({ message: "No Previous Entries Found" });
 
-        let LatestEntry = entries.allEntries.pop(); 
+        let LatestEntry = entries.allEntries.pop();
         personnelHealth
           .findOne({ _id: ObjectId(LatestEntry) })
           .then(async (lastEntry) => {
@@ -242,7 +242,7 @@ router.post(
             //     });
             // }
             const previousEntries = entries.allEntries;
-            return res.status(200).json({ lastEntry,previousEntries });
+            return res.status(200).json({ lastEntry, previousEntries });
           })
           .catch((err) => {
             return res.status(500).json({ message: "Internal Server Error" });
