@@ -16,6 +16,7 @@ router.post("/view/:id", AuthController.verify_token, function (req, res) {
         return res.status(200).json({ battalions });
       })
       .catch((err) => {
+        console.log(err);
         return res.status(500).json({ message: "Internal Server Error" });
       });
   else
@@ -138,12 +139,14 @@ router.post(
             const HParameter = await healthParameter.findOne({
               _id: ObjectId(LReportParameter.healthParameter),
             });
-            for (const HealthParamStage of HealthParamStages) {
-              if (HParameter.name == HealthParamStage.ParameterName) {
-                const currentParam = HealthParamStage;
-                for (const currentStage of currentParam.stages) {
-                  if (LReportParameter.stage == currentStage.StageName) {
-                    currentStage.count += 1;
+            if (HParameter) {
+              for (const HealthParamStage of HealthParamStages) {
+                if (HParameter.name == HealthParamStage.ParameterName) {
+                  const currentParam = HealthParamStage;
+                  for (const currentStage of currentParam.stages) {
+                    if (LReportParameter.stage == currentStage.StageName) {
+                      currentStage.count += 1;
+                    }
                   }
                 }
               }
