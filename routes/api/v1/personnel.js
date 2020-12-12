@@ -4,6 +4,7 @@ const personnel = require("../../../models/personnel");
 const company = require("../../../models/company");
 const ObjectId = require("mongodb").ObjectId;
 const AuthController = require("../../../contollers/AuthController");
+const {  startSession } = require("mongoose");
 
 router.post("/view/:id", AuthController.verify_token, function (req, res) {
   if (req.params.id == "all") {
@@ -158,5 +159,44 @@ router.delete(
         });
   }
 );
+
+router.post("/changeCompany", AuthController.verify_token,
+AuthController.is_authorized,
+async function (req, res){
+  try{
+    if(req.decoded.priority<3 || req.decoded.company==req.body.company){
+      const Company = await company.findOne({_id:ObjectId(req.body.companyId)});
+      if(!Company) return res.status(400).json({message:"Invalid Company Id"});
+      const Personnel = await personnel.findOne({_id:ObjectId(req.body.personnelId)});
+      const oldCompany = await company.findOne({_id:ObjectId(Personnel.company)});
+      console.log(oldCompany);
+      //remove from old company
+      let oldCompanyPersonnels = oldCompany.personnel; 
+      for(let i = 0;i < oldCompanyPersonnels.length;i++){
+        if(oldCompanyPersonnels[i] == req.body.personnelId){
+          oldCompanyPersonnels.splice(i,1);
+        }
+      }
+      //add to new company
+      console.log(Company);
+      let newCompanyPersonnels = Company.personnel;
+      newCompanyPersonnels.push(Personnel._id); 
+
+      await personnel.updateOne({_id:ObjectId(req.body.personnelId)},{$set:{company:Company._id}});//Update Personnel
+      await company.updateOne({_id:ObjectId(oldCompany._id)},{$set:{personnel:oldCompanyPersonnels}})//Update old company
+      await company.updateOne({_id:ObjectId(req.body.companyId)},{$set:{personnel:newCompanyPersonnels}})//Update new Company
+
+       const updatedPersonnel = await personnel.findOne({_id:req.body.personnelId});
+       res.status(200).json({oldCompany:oldCompany._id,
+        updatedCompany:updatedPersonnel.company});
+    } 
+    else{
+      return res.status(401).json({message:"Unauthorized"});  
+    }
+  }catch(err){
+    console.log(err);
+    return res.status(500).json({message:"Internal Server Error"});  
+  }
+});
 
 module.exports = router;
