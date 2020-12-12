@@ -365,7 +365,7 @@ router.get("/showPersonnels",
       if(req.decoded.priority<2 || (req.decoded.priority == 2 && adminCompany.battalion == Company.battalion)){
         const Admin = await admin.findOne({_id:ObjectId(req.body.adminId)});
         if(!Admin) return res.status(401).json({message:"Incorrect Admin Id"});
-        if(String(Admin.company)!=String(req.body.company)) {console.log(Admin.company,req.body.company);return res.status(401).json({message:"Cannot Process Request as Admin is not from requested company"});}
+        if(String(Admin.company)!=String(req.body.company)) {return res.status(401).json({message:"Cannot Process Request as Admin is not from requested company"});}
         try{
           await admin.deleteOne({_id:ObjectId(req.body.adminId)});
           res.status(200).json({message:"Admin status of personnel removed successfully"});
