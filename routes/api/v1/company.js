@@ -9,6 +9,7 @@ const personnelHealth = require('../../../models/personnelHealth');
 const bcrypt = require('bcrypt');
 const ObjectId = require('mongodb').ObjectId;
 const AuthController = require('../../../contollers/AuthController');
+const { findOne } = require('../../../models/battalion');
 
 router.post('/view/:id', AuthController.verify_token, function (req, res) {
   if (req.params.id == 'all') {
@@ -160,9 +161,9 @@ router.post(
           _id: ObjectId(req.body.company),
         });
         let personnelScoresObj = {
-          poor:0,
-          medium:0,
-          good:0
+          poor: 0,
+          medium: 0,
+          good: 0
         }
         if (!Company)
           return res.status(400).json({ message: "No Company Found" });
@@ -193,9 +194,9 @@ router.post(
           });
           if (!LastReport) continue;
 
-          if(LastReport.score < 4) personnelScoresObj.poor+=1;
-          else if(LastReport.score >= 4 && LastReport.score < 7) personnelScoresObj.medium+=1;
-          else personnelScoresObj.good+=1;
+          if (LastReport.score < 4) personnelScoresObj.poor += 1;
+          else if (LastReport.score >= 4 && LastReport.score < 7) personnelScoresObj.medium += 1;
+          else personnelScoresObj.good += 1;
 
           for (const LReportParameter of LastReport.parameters) {
             const HParameter = await healthParameter.findOne({
@@ -214,9 +215,9 @@ router.post(
           }
         }
 
-        return res.status(200).json({ HealthParamStages,personnelScoresObj });
+        return res.status(200).json({ HealthParamStages, personnelScoresObj });
       }
-      else return res.status(401).json({message:"Unauthorized"});
+      else return res.status(401).json({ message: "Unauthorized" });
     } catch (err) {
       console.log(err);
       return res.status(403).json({ message: "Internal Server Error" });
@@ -225,42 +226,158 @@ router.post(
 );
 
 router.post("/individualOverview",
-AuthController.verify_token,
-AuthController.is_authorized,
-async function (req, res){
-  try{
-    if(req.decoded.priority<3 || req.decoded.company == req.body.company){
-      const Personnels = await personnel.find({company:ObjectId(req.body.company)})
-      let individualInfoArr = new Array();
-      for(const p of Personnels){
-        const lastRecord = await personnelHealth.findOne({_id:ObjectId(p.allEntries[p.allEntries.length-1])});
-        let weight,height,score;
-        if(!lastRecord) {
-           weight = "No records";
-           height = "No records";
-           score = "No records";
+  AuthController.verify_token,
+  AuthController.is_authorized,
+  async function (req, res) {
+    try {
+      if (req.decoded.priority < 3 || req.decoded.company == req.body.company) {
+        const Personnels = await personnel.find({ company: ObjectId(req.body.company) })
+        let individualInfoArr = new Array();
+        for (const p of Personnels) {
+          const lastRecord = await personnelHealth.findOne({ _id: ObjectId(p.allEntries[p.allEntries.length - 1]) });
+          let weight, height, score;
+          if (!lastRecord) {
+            weight = "No records";
+            height = "No records";
+            score = "No records";
+          }
+          else {
+            weight = lastRecord.weight;
+            height = lastRecord.height;
+            score = lastRecord.score
+          }
+          const individualInfoObj = {
+            metalNo: p.metalNo,
+            Name: p.Name,
+            Weight: weight,
+            height: height,
+            Company: p.company,
+            Score: score
+          };
+          individualInfoArr.push(individualInfoObj);
         }
-        else{
-          weight = lastRecord.weight;
-          height = lastRecord.height;
-          score = lastRecord.score
-        }
-        const individualInfoObj = {
-          metalNo:p.metalNo,
-          Name:p.Name,
-          Weight : weight,
-          height : height,
-          Company : p.company,
-          Score : score          
-        };
-        individualInfoArr.push(individualInfoObj);
+        res.status(200).json({ individualInfoArr });
       }
-      res.status(200).json({individualInfoArr});
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ message: "Internal Server Error", err });
     }
-  }catch(err){
-    console.log(err);
-    return res.status(500).json({message:"Internal Server Error",err});
-  }
-}); 
+  });
+
+router.get("/showPersonnels",
+  AuthController.verify_token,
+  AuthController.is_authorized,
+  async function (req, res) {
+    try{
+      if(req.decoded.priority<3 || (req.decoded.priority == 3 && req.decoded.company == req.body.company)){
+        const Personnels = personnel.find({company:req.body.company});
+        return res.status(200).json({Personnels});
+      }
+      else{
+        return res.status(401).json({message:"Unauthorized"});
+      }
+    }catch(err){
+      return res.status(500).json({message:"Internal server error"});
+    }
+  });
+
+  router.post("/addAdmins",
+  AuthController.verify_token,
+  AuthController.is_authorized,
+  async function (req, res) {
+    try{
+      const adminCompany = await company.findOne({_id:ObjectId(req.decoded.company)});
+      //if(!adminCompany) return res.status(400).json({message:"No adminCompany"});
+      const Company = await company.findOne({_id:ObjectId(req.body.company)});
+      if(!Company) return res.status(400).json({message:"No Company Present"});
+      if(req.decoded.priority<2 || (req.decoded.priority == 2 && adminCompany.battalion == Company.battalion)){
+        let unaddedPersonnels = new Array();
+        let newAdmins = new Array();
+        for (const p of req.body.Personnels){
+          const Personnel = await personnel.findOne({_id:ObjectId(p.pId)});
+          if (Personnel.company==req.body.company){
+            try{
+              const hash = await bcrypt.hash(p.password,10);
+              let newAdmin = new admin ({
+                username : p.username,
+                password : hash,
+                company: req.body.company,
+                battalion:Company.battalion,
+                personnelID : ObjectId(p.pId),
+                priority : p.priority
+              });            
+              console.log(hash);      
+              await newAdmin.save();
+              newAdmins.push({PersonnelId:Personnel._id,PersonnelName : Personnel.personnelName});
+            }catch(err){ 
+              console.log(err);
+              unaddedPersonnels.push({PersonnelId:Personnel._id,PersonnelName : Personnel.personnelName});
+            } 
+          }
+          else{
+            unaddedPersonnels.push({
+              PersonnelId:Personnel._id,
+              PersonnelName : Personnel.personnelName
+            });
+          }
+        }
+        res.status(200).json({
+          newAdmins,
+        unaddedPersonnels
+      });
+      }
+      else{
+        return res.status(401).json({message:"Unauthorized"});
+      }
+    }catch(err){
+      return res.status(500).json({message:"Internal server error"});
+    }
+  });
+
+  router.post("/getAdmins",
+  AuthController.verify_token,
+  AuthController.is_authorized,
+  async function (req, res){
+    try{
+      if(req.decoded.priority<3 || (req.decoded.priority == 3 && req.decoded.company == req.body.company)){
+        const Admins = await admin.find({company:req.body.company});
+        res.status(200).json({Admins});
+      }
+      else{
+        return res.status(401).json({message:"Unauthorized"});
+      }
+
+    }catch(err){
+      console.log(err);
+      return res.status(500).json({message:"Internal Server Error"});
+    }
+  });
+
+  router.post("/removeAdmin", 
+  AuthController.verify_token,
+  AuthController.is_authorized,
+  async function (req, res){
+    try{
+      const adminCompany = await company.findOne({_id:ObjectId(req.decoded.company)});
+      //if(!adminCompany) return res.status(400).json({message:"No adminCompany"});
+      const Company = await company.findOne({_id:ObjectId(req.body.company)});
+      if(!Company) return res.status(400).json({message:"No Company Present"});
+      if(req.decoded.priority<2 || (req.decoded.priority == 2 && adminCompany.battalion == Company.battalion)){
+        const Admin = await admin.findOne({_id:ObjectId(req.body.adminId)});
+        if(!Admin) return res.status(401).json({message:"Incorrect Admin Id"});
+        if(String(Admin.company)!=String(req.body.company)) {console.log(Admin.company,req.body.company);return res.status(401).json({message:"Cannot Process Request as Admin is not from requested company"});}
+        try{
+          await admin.deleteOne({_id:ObjectId(req.body.adminId)});
+          res.status(200).json({message:"Admin status of personnel removed successfully"});
+        }catch(err){
+          console.log(err);
+          return res.status(500).json({message:"Deletion failed"});
+        }
+      }
+    }catch(err){
+      console.log(err);
+      return res.status(500).json({message:"Internal Server Error"});
+    }
+  });
 
 module.exports = router;
