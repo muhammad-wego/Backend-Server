@@ -458,34 +458,5 @@ router.get("/showPersonnels",
       return res.status(500).json({message:"Internal Server Error"});
     }
   });
-=======
-          } else {
-            weight = lastRecord.weight;
-            height = lastRecord.height;
-            score = lastRecord.score;
-          }
-          const CompanyInfo = await company.findById(p.company);
-          const individualInfoObj = {
-            _id: p._id,
-            metalNo: p.metalNo,
-            Name: p.personnelName,
-            Weight: weight,
-            height: height,
-            Company: p.company,
-            companyName: CompanyInfo.companyName,
-            rank: p.rank,
-            Score: score,
-          };
-          individualInfoArr.push(individualInfoObj);
-        }
-        res.status(200).json({ individualInfoArr });
-      }
-    } catch (err) {
-      console.log(err);
-      return res.status(500).json({ message: "Internal Server Error", err });
-    }
-  }
-);
-
 
 module.exports = router;
