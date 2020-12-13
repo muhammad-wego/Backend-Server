@@ -9,7 +9,7 @@ const options = {
     poolSize: 10
 }
 
-mongoose.connect(db_uri2,options).then(
+mongoose.connect(db_uri,options).then(
     () => {
         console.log("Database Connection Established");
     },
