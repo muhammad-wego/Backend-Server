@@ -60,6 +60,7 @@ router.post(
         if (!matchedCompany)
           return res.status(403).json({ message: "Unauthorized" });
         else {
+          if(typeof req.body.metalNo === "undefined" ) req.body.metalNo = null;
           let newPersonnel = new personnel({
             personnelName: req.body.personnelName,
             company: req.body.companyID,
