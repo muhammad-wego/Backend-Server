@@ -153,8 +153,81 @@ router.post(
             }
           }
         }
-
-        return res.status(200).json({ HealthParamStages, personnelScoresObj });
+        //Avg Weight over a specified number of months :Starts here
+        //DO NOT TOUCH
+        let monthAvgWeightArr = new Array();
+        const dateNow = new Date();
+        const currentMonth = dateNow.getMonth();
+        let currentYear = dateNow.getFullYear();
+        let numberOfMonths = req.body.numberOfMonths;
+        if (numberOfMonths > 70) return res.status(400).json({ message: "Number of months exceeded threshold of 70 months" });
+        let tempMonth;
+        for (let i = 0; i < numberOfMonths; i++) {
+          if ((currentMonth - i) % 12 == -1 && currentMonth - i <= -1) currentYear--;
+          if (currentMonth - i <= -1) {
+            tempMonth = 11 - ((-(currentMonth + 1 - i)) % 12);
+          }
+          else {
+            tempMonth = currentMonth - i;
+          }
+          const dateLessThan = new Date(String(currentYear) + "-" + String(tempMonth + 1) + "-" + String(31));
+          const dateGreaterThan = new Date(String(currentYear) + "-" + String(tempMonth + 1) + "-" + String(1));
+          //DO NOT TOUCH
+          let TotalWeight = 0;
+          let TotalRec= 0;
+          for (const cmp of Battalion.companies) {
+            const PersonHealthCurrMon = await personnel.aggregate([{
+              $match: { "company": ObjectId(cmp) }
+            },
+            {
+              $lookup: {
+                from: "personnelhealths",
+                as: "CurrMonRecs",
+                let: { "pId": "$_id" },
+                pipeline: [{
+                  $match: {
+                    $expr: {
+                      $and: [{ $eq: [{ $toObjectId: "$personnel" }, { $toObjectId: "$$pId" }] },
+                      { $gte: ["$dateOfEntry", dateGreaterThan] },
+                      { $lte: ["$dateOfEntry", dateLessThan] }]
+                    }
+                  }
+                }]
+              }
+            }, {
+              $project: {
+                "company": 1,
+                "CurrMonRecs": {
+                  "dateOfEntry": 1,
+                  "weight": 1
+                }
+              }
+            }
+            ]);
+            let weightSum = 0;
+            let recCount = 0;
+            for (const i of PersonHealthCurrMon) {
+              console.log(i.company);
+              if (i.CurrMonRecs.length != 0) {
+                for (const j of i.CurrMonRecs) {
+                  console.log(j.weight,j.dateOfEntry);
+                  weightSum += j.weight;
+                  recCount++;
+                }
+              }
+            }
+            TotalWeight += weightSum;
+            TotalRec += recCount; 
+          }
+          monthlyAvgObj = {
+            Month: tempMonth + 1,
+            Year: currentYear,
+            AverageWeight: TotalWeight / TotalRec
+          }
+          monthAvgWeightArr.push(monthlyAvgObj);
+        }
+        //Avg Weight over a specified number of months :Ends here
+        return res.status(200).json({ HealthParamStages, personnelScoresObj,monthAvgWeightArr });
       } else return res.status(401).json({ message: "Unauthorized" });
     } catch (err) {
       console.log(err);

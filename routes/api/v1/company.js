@@ -373,12 +373,14 @@ router.post(
             },
             {
               $lookup:{
-              from:"personnelhealths",
-              as:"CurrMonRecs",
-              let:{"pId":"$_id"},
-              pipeline:[{
-              $match:{$expr:{$and:[{$eq:[{$toObjectId:"$personnel"},{$toObjectId:"$$pId"}]},{$gte:["$dateOfEntry",dateGreaterThan]},{$lte:["$dateOfEntry",dateLessThan]}]}}
-              }]
+                from:"personnelhealths",
+                as:"CurrMonRecs",
+                let:{"pId":"$_id"},
+                pipeline:[{
+                  $match:{$expr:{$and:[{$eq:[{$toObjectId:"$personnel"},{$toObjectId:"$$pId"}]},
+                  {$gte:["$dateOfEntry",dateGreaterThan]},
+                  {$lte:["$dateOfEntry",dateLessThan]}]}}
+                }]
               }
             },{
               $project:{
@@ -407,9 +409,7 @@ router.post(
         }
         monthAvgWeightArr.push(monthlyAvgObj);
       }
-
         //Avg Weight over a specified number of months :Ends here
-
         return res.status(200).json({ HealthParamStages, personnelScoresObj,monthAvgWeightArr });
       } else return res.status(401).json({ message: "Unauthorized" });
     } catch (err) {
