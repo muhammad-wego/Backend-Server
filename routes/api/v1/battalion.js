@@ -431,4 +431,57 @@ async function (req, res){
   }
 });
 
+router.post(
+  "/individualOverview/all",
+  AuthController.verify_token,
+  AuthController.is_authorized,
+  async function (req, res) {
+    if (!req.body.company) {
+      req.body.company = req.decoded.company;
+    }
+    try {
+      if (req.decoded.priority === 1) {
+        const Personnels = await personnel.find();
+        let individualInfoArr = new Array();
+        for (const p of Personnels) {
+          const lastRecord = await personnelHealth.findOne({
+            _id: ObjectId(p.allEntries[p.allEntries.length - 1]),
+          });
+          console.log(lastRecord);
+          let weight, height, score;
+          if (!lastRecord) {
+            weight = "No records";
+            height = "No records";
+            score = "No records";
+          } else {
+            weight = lastRecord.weight;
+            height = lastRecord.height;
+            score = lastRecord.score;
+          }
+          const CompanyInfo = await company.findById(p.company);
+          let companyName ;
+          if(!CompanyInfo) companyName = null;
+          else companyName = CompanyInfo.companyName
+          const individualInfoObj = {
+            _id: p._id,
+            metalNo: p.metalNo,
+            Name: p.personnelName,
+            Weight: weight,
+            height: height,
+            Company: p.company,
+            companyName: companyName,
+            rank: p.rank,
+            Score: score,
+          };
+          individualInfoArr.push(individualInfoObj);
+        }
+        res.status(200).json({ individualInfoArr });
+      }
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ message: "Internal Server Error", err });
+    }
+  }
+);
+
 module.exports = router;
