@@ -129,13 +129,55 @@ router.post("/add", AuthController.verify_token, function (req, res) {
                   .status(500)
                   .json({ message: "Internal Server Error" });
               } else {
-                return res.status(200).json({message:"Company Created"});
-                let newPersonnel = new personnel({
-                  personnelName: req.body.adminName,
-                  company: companyResult._id,
-                  metalNo: req.body.adminName,
-                });
+                bcrypt.hash(
+                  req.body.adminPassword,
+                  10,
+                  function (err, hash) {
+                    if (err) {
+                      console.log(err);
+                      return res
+                        .status(500)
+                        .json({ message: "Internal Server Error" });
+                    } else {
+                      let newAdmin = new admin({
+                        username: req.body.adminUsername,
+                        password: hash,
+                        priority: 3,
+                        battalion: battalionResult._id,
+                        company: companyResult._id,
+                        location: req.body.location,
+                      });
 
+                      newAdmin.save((err, adminResult) => {
+                        if (err) {
+                          console.log(err);
+                          return res
+                            .status(500)
+                            .json({ message: "Internal Server Error" });
+                        } else {
+                          companyResult.personnel.push(adminResult._id);
+                          companyResult.save((err, result) => {
+                            if (err) {
+                              console.log(err);
+                              return res
+                                .status(500)
+                                .json({ message: "Internal Server Error" });
+                            }
+                            return res
+                              .status(200)
+                              .json({ message: "Company Created" });
+                          });
+                        }
+                      });
+                    }
+                  }
+                );
+                //let newPersonnel = new personnel({
+                //  personnelName: req.body.adminName,
+                //  company: companyResult._id,
+                //  metalNo: req.body.adminName,
+                //});
+/*
                 newPersonnel.save((err, personnelResult) => {
                   if (err) {
                     console.log(err);
@@ -197,7 +239,7 @@ router.post("/add", AuthController.verify_token, function (req, res) {
                       }
                     );
                   }
-                });
+                });*/
               }
             });
           }
