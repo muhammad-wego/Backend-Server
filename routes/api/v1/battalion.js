@@ -272,13 +272,23 @@ router.post(
           const lastRecord = await personnelHealth.findOne({
             _id: ObjectId(p.allEntries[p.allEntries.length - 1]),
           });
+
+          const rec4wt = await personnelHealth.findOne({
+            _id: ObjectId(p.allEntries[p.allEntries - 2])
+          });
+          
+          let lwt =0;
+          if(rec4wt) {
+            lwt = rec4wt.weight
+          }
+
           let weight, height, score;
           if (!lastRecord) {
             weight = "No records";
             height = "No records";
             score = "No records";
           } else {
-            weight = lastRecord.weight;
+            weight = ((lastRecord.weight-lwt)/lastRecord.weight)*100;
             height = lastRecord.height;
             score = lastRecord.score;
           }
@@ -287,7 +297,7 @@ router.post(
             _id: p._id,
             metalNo: p.metalNo,
             Name: p.personnelName,
-            Weight: weight,
+            Weight: weight-lwt,
             height: height,
             Company: p.company,
             companyName: CompanyInfo.companyName,
