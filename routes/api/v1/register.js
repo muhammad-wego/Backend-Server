@@ -27,7 +27,7 @@ router.post('/',function(req,res){
 });
 
 router.post('/updatePassword',AuthController.verify_token,function(req,res){    
-    if(req.decoded.priority < 3) {
+    if(req.decoded.priority < 2) {
         admin.findOne({_id:req.body.adminID}).then(matchedAdmin => {
             if(!matchedAdmin) return res.status(403).json({message : "Admin Not Found"});
             else {
