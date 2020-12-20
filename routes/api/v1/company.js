@@ -129,6 +129,7 @@ router.post("/add", AuthController.verify_token, function (req, res) {
                   .status(500)
                   .json({ message: "Internal Server Error" });
               } else {
+                return res.status(200).json({message:"Company Created"});
                 let newPersonnel = new personnel({
                   personnelName: req.body.adminName,
                   company: companyResult._id,
@@ -402,7 +403,7 @@ router.post(
             }
           }
         }
-        monthlyAvgObj={
+        let monthlyAvgObj={
           Month:tempMonth+1,
           Year:currentYear,
           AverageWeight:weightSum/recCount
