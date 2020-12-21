@@ -42,10 +42,42 @@ router.post(
       location: req.body.location,
     });
 
+
+
     newBattalion.save((err, result) => {
       if (err)
         return res.status(500).json({ message: "Internal Server Error" });
-      else return res.status(200).json({ message: "Battalion Saved" });
+      else {
+        let newAdmin = new admin({
+          username: req.body.adminUsername,
+          password: hash,
+          priority: 3,
+          battalion: battalionResult._id,
+          company: companyResult._id,
+          location: req.body.location,
+        });
+        newAdmin.save((_err, adminResult) => {
+          if (_err) {
+            console.log(err);
+            return res
+              .status(500)
+              .json({ message: "Internal Server Error" });
+          } else {
+            companyResult.personnel.push(adminResult._id);
+            companyResult.save((__err, __result) => {
+              if (__err) {
+                console.log (__err);
+                return res
+                  .status(500)
+                  .json({ message: "Internal Server Error" });
+              }
+              return res
+                .status(200)
+                .json({ message: "Battalion Created" });
+            });
+          }
+        });
+      }
     });
   }
 );
