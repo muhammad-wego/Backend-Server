@@ -341,7 +341,7 @@ router.post(
 
             personnelHealth.find({_id:matchedPersonnel._id}).then(records =>{
               records.forEach((record,i)=>{
-                if(record.dateOfEntry.getMonth()==Date.getMonth){
+                if(record.dateOfEntry.getMonth()==Date.getMonth()){
                   return res.status(403).json({message:"Record already added this month"});
                 }
                 else {
