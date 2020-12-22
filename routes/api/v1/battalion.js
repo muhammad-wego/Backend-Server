@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
 const router = express.Router();
 const battalion = require("../../../models/battalion");
 const ObjectId = require("mongodb").ObjectId;
@@ -7,6 +8,7 @@ const company = require("../../../models/company");
 const personnel = require("../../../models/personnel");
 const healthParameter = require("../../../models/healthParameter");
 const personnelHealth = require("../../../models/personnelHealth");
+const admin  = require("../../../models/admin");
 
 router.post("/view/:id", AuthController.verify_token, function (req, res) {
   if (req.params.id == "all")
@@ -34,42 +36,42 @@ router.post(
   "/add",
   AuthController.verify_token,
   AuthController.is_authorized,
-  function (req, res) {
+  async function (req, res) {
     if (req.decoded.priority > 1)
       return res.status(403).json({ message: "Unauthorized" });
     let newBattalion = new battalion({
       battalionNumber: req.body.battalionNumber,
-      location: req.body.location,
+      location: req.body.battalionLocation,
     });
-
-
-
+    const hash = await bcrypt.hash(req.body.adminPassword,10);
     newBattalion.save((err, result) => {
-      if (err)
-        return res.status(500).json({ message: "Internal Server Error" });
+      if (err){
+        console.log(err);
+       return res.status(500).json({ message: "Internal Server Error1" });
+      }
       else {
         let newAdmin = new admin({
           username: req.body.adminUsername,
           password: hash,
-          priority: 3,
-          battalion: battalionResult._id,
-          company: companyResult._id,
-          location: req.body.location,
+          priority: 2,
+          battalion: result._id,
+          company: null,
+          location: req.body.adminLocation,
         });
         newAdmin.save((_err, adminResult) => {
           if (_err) {
             console.log(err);
             return res
               .status(500)
-              .json({ message: "Internal Server Error" });
+              .json({ message: "Internal Server Error2" });
           } else {
-            companyResult.personnel.push(adminResult._id);
-            companyResult.save((__err, __result) => {
+            result.admins.push(adminResult._id);
+            result.save((__err, __result) => {
               if (__err) {
                 console.log (__err);
                 return res
                   .status(500)
-                  .json({ message: "Internal Server Error" });
+                  .json({ message: "Internal Server Error3" });
               }
               return res
                 .status(200)
