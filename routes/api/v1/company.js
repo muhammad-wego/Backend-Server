@@ -155,18 +155,7 @@ router.post("/add", AuthController.verify_token, function (req, res) {
                             .status(500)
                             .json({ message: "Internal Server Error" });
                         } else {
-                          companyResult.personnel.push(adminResult._id);
-                          companyResult.save((err, result) => {
-                            if (err) {
-                              console.log(err);
-                              return res
-                                .status(500)
-                                .json({ message: "Internal Server Error" });
-                            }
-                            return res
-                              .status(200)
-                              .json({ message: "Company Created" });
-                          });
+                            res.status(200).json({message:"Company Created"});
                         }
                       });
                     }

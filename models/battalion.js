@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const battalionSchema = new mongoose.Schema({
     battalionNumber : {
-        type:Number,
+        type:String,
         unique:true,
         required:true
     },
