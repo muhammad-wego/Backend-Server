@@ -88,10 +88,15 @@ router.delete(
   "/remove",
   AuthController.verify_token,
   AuthController.is_authorized,
-  function (req, res) {
+  async function (req, res) {
     if (req.decoded.priority > 1)
       return res.status(403).json({ message: "Unauthorized" });
-    battalion.deleteOne(
+      const Companies = await company.find({battalion:ObjectId(req.body.battalionID)});
+      for(const c of Companies){
+        await personnel.deleteMany({company:ObjectId(c._id)});
+        await company.deleteOne({_id:ObjectId(c._id)});
+      }
+      battalion.deleteOne(
       { _id: ObjectId(req.body.battalionID) },
       (err, result) => {
         if (err)
