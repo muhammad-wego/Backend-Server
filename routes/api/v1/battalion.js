@@ -89,7 +89,8 @@ router.delete(
   AuthController.verify_token,
   AuthController.is_authorized,
   async function (req, res) {
-    if (req.decoded.priority > 1)
+    try{
+      if (req.decoded.priority > 1)
       return res.status(403).json({ message: "Unauthorized" });
       const Companies = await company.find({battalion:ObjectId(req.body.battalionID)});
       for(const c of Companies){
@@ -104,6 +105,10 @@ router.delete(
         else return res.status(200).json({ message: "Battalion Removed" });
       }
     );
+    }catch(err){
+      console.log(err);
+      return res.status(500).json({message:"Internal Server Error"});
+    }   
   }
 );
 

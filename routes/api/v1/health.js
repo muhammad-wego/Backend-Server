@@ -321,7 +321,7 @@ router.post(
 );
 
 router.post(
-  "/add",
+  "/addRecord",
   AuthController.verify_token,
   AuthController.is_authorized,
   function (req, res) {
@@ -406,5 +406,83 @@ router.post(
       });
   }
 );
+
+
+router.post('/add',AuthController.verify_token,
+AuthController.is_authorized,
+async function (req, res){
+  try{
+    if(req.decoded.priority < 3 ||  String(req.decoded.company) == String(matchedPersonnel.company)){
+      if (!ObjectId.isValid(req.body.personnelID))
+      return res.status(403).json({ message: "Invalid Personnel" });
+      const matchedPersonnel = await personnel.findOne({ _id: ObjectId(req.body.personnelID)});
+      const lastEntry = await personnelHealth.findOne({_id:ObjectId(matchedPersonnel.allEntries[matchedPersonnel.allEntries.length - 1])});
+      if(lastEntry)
+        if(lastEntry.dateOfEntry.getMonth() == new  Date().getMonth()){
+          return res.status(400).json({message:"Entry already done for this month"});
+        }
+      let newHealthRep = new personnelHealth({
+        personnel: matchedPersonnel._id,
+        parameters: [],
+        dateOfEntry: new Date().getTime(),
+        height: req.body.height,
+        weight: req.body.weight,
+        bmi:
+          Number(req.body.weight) /
+          (Number(req.body.height) * Number(req.body.height)),
+        score: 10,
+      });
+      let deduction = 0;
+      for(const param of req.body.parameters){
+        if (!ObjectId.isValid(param.healthParameter))
+        return res.status(403).json({ message: "Unauthorized Param" });
+        let currentParam = {};
+        currentParam.healthParameter = param.healthParameter;
+        if (typeof param.stage != "undefined"){
+          currentParam.stage = param.stage;
+          const hparam = await healthParameter.findOne({_id:ObjectId(param.healthParameter)})
+          for(const stg of hparam.stages){
+            if(stg.name === param.stage){
+              deduction += stg.score;
+            }
+          }
+        }
+        if (typeof param.value != "undefined")
+          currentParam.value = param.value;
+        if (typeof param.presence != "undefined")
+          currentParam.presence = param.presence;
+        newHealthRep.parameters.push(currentParam);
+      }
+      newHealthRep.score += deduction;
+      await newHealthRep.save((err, result) => {
+        if (err)
+          return res
+            .status(500)
+            .json({ message: "Internal Server Error" });
+        matchedPersonnel.allEntries.push(result._id);
+        if (
+          typeof req.body.followUpRequired != "undefined" &&
+          typeof req.body.followUpRequired == "boolean"
+        )
+        matchedPersonnel.followUpRequired = req.body.followUpRequired;
+        matchedPersonnel.save((err, _result) => {
+          if (err)
+            return res
+              .status(500)
+              .json({ message: "Internal Server Error 1" });
+          return res
+            .status(200)
+            .json({ message: "Health Record Created" });
+        });
+      });
+    }
+    else{
+      return res.status(401).json({message:"Unauthorized"});
+    }
+  }catch(err){
+    console.log(err);
+    return res.status(500).json({message:"Internal Server Error2"});
+  }
+});
 
 module.exports = router;
