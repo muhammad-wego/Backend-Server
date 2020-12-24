@@ -454,7 +454,7 @@ async function (req, res){
           currentParam.presence = param.presence;
         newHealthRep.parameters.push(currentParam);
       }
-      newHealthRep.score += deduction;
+      newHealthRep.score -= deduction;
       await newHealthRep.save((err, result) => {
         if (err)
           return res
