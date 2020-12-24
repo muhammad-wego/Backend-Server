@@ -412,10 +412,11 @@ router.post('/add',AuthController.verify_token,
 AuthController.is_authorized,
 async function (req, res){
   try{
+    const matchedPersonnel = await personnel.findOne({ _id: ObjectId(req.body.personnelID)});
+    if(!matchedPersonnel) return res.status(400).json({message: "Invalid Personnel"});
     if(req.decoded.priority < 3 ||  String(req.decoded.company) == String(matchedPersonnel.company)){
       if (!ObjectId.isValid(req.body.personnelID))
-      return res.status(403).json({ message: "Invalid Personnel" });
-      const matchedPersonnel = await personnel.findOne({ _id: ObjectId(req.body.personnelID)});
+      return res.status(403).json({ message: "Invalid Personnel" });     
       const lastEntry = await personnelHealth.findOne({_id:ObjectId(matchedPersonnel.allEntries[matchedPersonnel.allEntries.length - 1])});
       if(lastEntry)
         if(lastEntry.dateOfEntry.getMonth() == new  Date().getMonth()){
