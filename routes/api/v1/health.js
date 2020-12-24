@@ -229,7 +229,6 @@ router.post(
         if(allPersonnelHealth.length > 6){
          allPersonnelHealth = allPersonnelHealth.slice(-6);
         }
-        console.log(allPersonnelHealth);
         let weightArr = [];
         for(const entry of allPersonnelHealth){
           let WeightObj = {
