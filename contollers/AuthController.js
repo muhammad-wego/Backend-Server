@@ -40,22 +40,10 @@ exports.is_authorized = function (req, res, next) {
       if (!matchedAdmin) res.status(401).json({ message: "Unauthorized" });
       else {
         req.decoded["priority"] = matchedAdmin.priority;
-        if (matchedAdmin.priority > 1)
-          personnel
-            .findOne({ _id: ObjectId(matchedAdmin.personnelInfo) })
-            .then((matchedPersonnel) => {
-              if (!matchedPersonnel)
-                return res
-                  .status(401)
-                  .json({ message: "Authentication Failed" });
-              else {
-                req.decoded["company"] = matchedPersonnel.company;
-                next();
-              }
-            })
-            .catch((err) => {
-              return res.status(500).json({ message: "Internal Server Error" });
-            });
+        if (matchedAdmin.priority > 1){
+          req.decoded["company"] = matchedAdmin.company;
+          next();
+        }
         else next();
       }
     })
