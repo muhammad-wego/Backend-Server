@@ -219,11 +219,26 @@ router.post(
   function (req, res) {
     personnel
       .findById(ObjectId(req.params.id))
-      .then((entries) => {
+      .then(async (entries) => {
         if (entries.allEntries.length < 1)
           return res.status(404).json({ message: "No Previous Entries Found" });
+        
+        let LatestEntry = entries.allEntries[entries.allEntries.length - 1];
 
-        let LatestEntry = entries.allEntries.pop();
+        const allPersonnelHealth = await personnelHealth.find({personnel:ObjectId(req.params.id)});
+        if(allPersonnelHealth.length > 6){
+         allPersonnelHealth = allPersonnelHealth.slice(-6);
+        }
+        console.log(allPersonnelHealth);
+        let weightArr = [];
+        for(const entry of allPersonnelHealth){
+          let WeightObj = {
+            Month:entry.dateOfEntry.getMonth() + 1,
+            Year:entry.dateOfEntry.getFullYear(),
+            Weight:entry.weight
+          }
+          weightArr.push(WeightObj);
+        }
         personnelHealth
           .findOne({ _id: ObjectId(LatestEntry) })
           .then(async (lastEntry) => {
@@ -242,7 +257,7 @@ router.post(
             //     });
             // }
             const previousEntries = entries.allEntries;
-            return res.status(200).json({ lastEntry, previousEntries });
+            return res.status(200).json({ lastEntry, previousEntries,weightArr });
           })
           .catch((err) => {
             return res.status(500).json({ message: "Internal Server Error" });
