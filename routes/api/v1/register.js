@@ -10,11 +10,9 @@ router.post('/',function(req,res){
     bcrypt.hash(req.body.password,10,function(err,hash){
         if(err) res.status(500).json({ message : "Registration Failed"});
         else {
-            if(!ObjectId.isValid(req.body.personnelID)) return res.status(401).json({message:"Invalid Personnel ID"});
             let newAdmin = new admin ({
                 username : req.body.username,
                 password : hash,
-                personnelID : ObjectId(req.body.personnelID),
                 priority : req.body.priority
             });
 
