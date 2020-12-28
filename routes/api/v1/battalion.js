@@ -124,7 +124,7 @@ router.post(
       req.body.battalion = req.decoded.battalion;
     }
     try {
-      const adminCompany = admin.findOne({
+      const adminCompany = await admin.findOne({
         username: String(req.decoded.username),
       });
       if (
