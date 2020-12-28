@@ -42,6 +42,7 @@ exports.is_authorized = function (req, res, next) {
         req.decoded["priority"] = matchedAdmin.priority;
         if (matchedAdmin.priority > 1){
           req.decoded["company"] = matchedAdmin.company;
+          req.decoded["battalion"] = matchedAdmin.battalion;
           next();
         }
         else next();
