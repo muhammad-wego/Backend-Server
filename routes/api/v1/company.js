@@ -17,7 +17,8 @@ router.post(
   async function (req, res) {
     if (req.params.id == "all") {
       let response = { companies: [] };
-      let companies = await company.find();
+      let adminCompany = await company.find({_id:ObjectId(req.decoded.company)});
+      let companies = await company.find({battalion:ObjectId(adminCompany.battalion)});
 
       if (!companies) {
         return res.status(500).json({ message: "Internal Server Error" });
