@@ -288,13 +288,19 @@ router.post(
   AuthController.verify_token,
   AuthController.is_authorized,
   async function (req, res) {
+    if (!req.body.company) {
+      req.body.company = req.decoded.company;
+    }
+    if(!req.body.battalion){
+      req.body.battalion = req.decoded.battalion;
+    }
     try {
-      const adminCompany = company.findOne({
-        _id: ObjectId(req.decoded.company),
+      const adminCompany = await admin.findOne({
+        username: String(req.decoded.username),
       });
       if (
         (req.decoded.priority === 2 &&
-          adminCompany.battalion == req.body.battalion) ||
+          String(adminCompany.battalion)==String(req.body.battalion)) ||
         req.decoded.priority < 2
       ) {
         const Battalion = await battalion.findOne({
