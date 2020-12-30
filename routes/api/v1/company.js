@@ -14,12 +14,21 @@ const { findOne } = require("../../../models/admin");
 router.post(
   "/view/:id",
   AuthController.verify_token,
+  AuthController.is_authorized,
   async function (req, res) {
+    if(!req.body.battalion)
+    {
+      req.body.battalion = req.decoded.battalion;
+    }
     if (req.params.id == "all") {
+      console.log(req.decoded)
       let response = { companies: [] };
-      let adminCompany = await company.find({_id:ObjectId(req.decoded.company)});
-      let companies = await company.find({battalion:ObjectId(adminCompany.battalion)});
-
+      if(!req.body.battalion)
+      {
+        return res.status(401).json({ message: "Unauthorized" });
+      } 
+      let companies = await company.find({battalion:ObjectId(req.decoded.battalion)});
+      console.log(companies)
       if (!companies) {
         return res.status(500).json({ message: "Internal Server Error" });
       }
@@ -91,7 +100,11 @@ router.post(
   }
 );
 
-router.post("/add", AuthController.verify_token, function (req, res) {
+router.post("/add", AuthController.verify_token,AuthController.is_authorized, function (req, res) {
+  if(!req.body.battalion)
+  {
+    req.body.battalion = req.decoded.battalion;
+  }
   if (req.decoded.priority > 2)
     return res.status(403).json({ message: "Unauthorized" });
   battalion
