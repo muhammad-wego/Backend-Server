@@ -22,7 +22,18 @@ router.post(
           .catch((err) => {
             return res.status(500).json({ message: "Internal Server Error" });
           });
-      } else {
+      } 
+      else if (req.decoded.priority == 2) {
+        personnel
+          .find({battalion:req.decoded.battalion})
+          .then((personnels) => {
+            return res.status(200).json({ personnels });
+          })
+          .catch((err) => {
+            return res.status(500).json({ message : "Internal Server Error"});
+          });
+      }
+      else {
         personnel
           .find({ company: req.decoded.company })
           .then((personnels) => {
@@ -66,6 +77,7 @@ router.post(
             company: req.body.companyID,
             rank: req.body.rank,
             metalNo: req.body.metalNo,
+            battalion: req.decoded.battalion,
             dateOfBirth: req.body.dateOfBirth,
           });
 
