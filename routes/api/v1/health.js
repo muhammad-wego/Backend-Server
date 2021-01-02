@@ -436,6 +436,7 @@ async function (req, res){
         if(lastEntry.dateOfEntry.getMonth() == new  Date().getMonth()){
           return res.status(400).json({message:"Entry already done for this month"});
         }
+      if(!req.body.remarks) req.body.remarks = "";
       let newHealthRep = new personnelHealth({
         personnel: matchedPersonnel._id,
         parameters: [],
@@ -446,6 +447,7 @@ async function (req, res){
           Number(req.body.weight) /
           (Number(req.body.height) * Number(req.body.height)),
         score: 10,
+        remarks:req.body.remarks
       });
       let deduction = 0;
       for(const param of req.body.parameters){
@@ -469,6 +471,7 @@ async function (req, res){
         newHealthRep.parameters.push(currentParam);
       }
       newHealthRep.score -= deduction;
+      if(newHealthRep.score < 0) newHealthRep.score = 0;
       await newHealthRep.save((err, result) => {
         if (err)
           return res

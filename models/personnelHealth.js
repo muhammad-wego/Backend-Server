@@ -38,6 +38,9 @@ const personnelHealthSchema = new mongoose.Schema({
     },
     score:{
         type:Number
+    },
+    remarks:{
+        type:String
     }
 });
 
