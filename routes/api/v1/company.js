@@ -679,10 +679,12 @@ router.post('/overviewMonthly',AuthController.verify_token,
 AuthController.is_authorized,
 async function (req, res){
   try{
+    if (!req.body.company) {
+      req.body.company = req.decoded.company;
+    }
     if(req.decoded.priority < 3 || (req.decoded.priority===3 && String(req.decoded.company)==String(req.body.company))){
       const dateLessThan = new Date(String(req.body.year)+"-"+String(req.body.month)+"-"+String(31));
       const dateGreaterThan = new Date(String(req.body.year)+"-"+String(req.body.month)+"-"+String(1)); 
-
       const PersonHealthOfMonth = await personnel.aggregate([{
         $match:{"company":ObjectId(req.body.company)}
         },
