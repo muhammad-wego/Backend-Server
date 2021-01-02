@@ -32,6 +32,7 @@ router.post("/add", AuthController.verify_token, function (req, res) {
     lowerRange: req.body.lowerRange,
     upperRange: req.body.upperRange,
     normalPresence: req.body.normalPresence,
+    type : req.body.type,
     stages: req.body.stages,
   });
 
@@ -52,6 +53,7 @@ router.post("/update/:id",AuthController.verify_token,function(req,res){
       if (typeof req.body.upperRange != 'undefined') matchedParam.upperRange = req.body.upperRange;
       if (typeof req.body.stages != 'undefined') matchedParam.stages = req.body.stages;
       if (typeof req.body.normalPresence != 'undefined') matchedParam.normalPresence = req.body.normalPresence;
+      if (typeof req.body.type != 'undefined') matchedParam.type = req.body.type;
       
       matchedParam.save((err,result) => {
         if(err) return res.status(500).json({message : "Internal Server Error"});
