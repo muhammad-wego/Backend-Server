@@ -22,6 +22,9 @@ const healthParameterSchema = new mongoose.Schema({
     normalPresence:{
         type:Boolean
     },
+    type : {
+        type: String
+    },
     stages:[stageSchema]
 });
 
