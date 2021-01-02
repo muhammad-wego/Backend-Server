@@ -640,4 +640,83 @@ async function (req, res){
   }
 });
 
+router.post('/overviewMonthly/all',
+AuthController.verify_token,
+AuthController.is_authorized,
+async function (req, res){
+  try{
+    if(req.decoded.priority == 1 ){
+      const dateLessThan = new Date(String(req.body.year)+"-"+String(req.body.month)+"-"+String(31));
+      const dateGreaterThan = new Date(String(req.body.year)+"-"+String(req.body.month)+"-"+String(1)); 
+
+      const PersonHealthOfMonth = await personnel.aggregate([
+        {
+          $lookup:{
+            from:"personnelhealths",
+            as:"MonthlyRecs",
+            let:{"pId":"$_id"},
+            pipeline:[{
+              $match:{$expr:{$and:[{$eq:[{$toObjectId:"$personnel"},{$toObjectId:"$$pId"}]},
+              {$gte:["$dateOfEntry",dateGreaterThan]},
+              {$lte:["$dateOfEntry",dateLessThan]}]}}
+            }]
+          }
+        },{
+          $project:{
+            "company":1,
+            "MonthlyRecs":{
+              "dateOfEntry":1,
+              "weight":1,
+              "parameters":1
+            }
+          }
+      }
+    ]);
+    const HealthParameters = await healthParameter.find();
+    let HealthParamStages = new Array();
+    for (const Parameter of HealthParameters) {
+      let paramObj = {
+        ParameterId : Parameter._id,
+        ParameterName: Parameter.name,
+        stages: new Array(),
+      };
+      for (const Stage of Parameter.stages) {
+        let stageObj = {
+          StageName: Stage.name,
+          count: 0,
+        };
+        paramObj.stages.push(stageObj);
+      }
+      HealthParamStages.push(paramObj);
+    }
+    for(const p of PersonHealthOfMonth){
+      for(const ph of p.MonthlyRecs){
+        for(const hp of ph.parameters){
+          console.log(hp);
+          for(const param of HealthParamStages){
+            if(String(hp.healthParameter) == String(param.ParameterId)){
+              for(const stage of param.stages){
+                if(hp.stage == stage.StageName){
+                  stage.count+=1;
+                  break;
+                }
+              }
+              break;
+            }
+          }
+        }
+      }
+       
+    }
+      
+    res.status(200).json({HealthParamStages});
+
+    }else{
+      return res.staus(401).json({message:"Unauthorized"});
+    }
+  }catch(err){
+    console.log(err);
+    return res.status(500).json({message:"Internal Server Error"});
+  }
+});
 module.exports = router;
