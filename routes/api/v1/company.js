@@ -351,6 +351,7 @@ router.post(
         let HealthParamStages = new Array();
         for (const Parameter of HealthParameters) {
           let paramObj = {
+            ParameterId:Parameter._id,
             ParameterName: Parameter.name,
             stages: new Array(),
           };
