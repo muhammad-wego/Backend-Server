@@ -367,7 +367,7 @@ router.post(
                     weight: req.body.weight,
                     bmi:
                       Number(req.body.weight) /
-                      (Number(req.body.height) * Number(req.body.height)),
+                      ((Number(req.body.height)/100) * (Number(req.body.height)/100)),
                     score: 10,
                   });
                   req.body.parameters.forEach((param, i) => {
