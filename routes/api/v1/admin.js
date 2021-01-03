@@ -6,7 +6,7 @@ const admin = require('../../../models/admin');
 const AuthController = require('../../../contollers/AuthController');
 
 // Route to Validate Username
-router.post('/validate',AuthController.verify_token,function(req,res){
+router.post('/validate',function(req,res){
     admin.findOne({username:req.body.username}).then(matchedAdmin => {
         if(!matchedAdmin) return res.status(404).json({message : "Admin Doesn't Exist"});
         else return res.status(200).json({message : "Admin Exists",priority : matchedAdmin.priority});
