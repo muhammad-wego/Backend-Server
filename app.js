@@ -24,6 +24,7 @@ let personnelRouter = require('./routes/api/v1/personnel');
 let healthParamRouter = require('./routes/api/v1/healthParameter');
 let healthRouter = require('./routes/api/v1/health');
 let filterRouter = require('./routes/api/v1/filter');
+let adminRouter = require('./routes/api/v1/admin');
 
 // Routes
 app.use('/api/v1/login',loginRouter);

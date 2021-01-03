@@ -9,6 +9,9 @@ const { findOne, find } = require("../../../models/personnel");
 const company = require("../../../models/company");
 const healthParameter = require("../../../models/healthParameter");
 
+const record = require('../../../models/personnelHealth');
+
+
 const HealParam = require("../../../models/healthParameter");
 const { body } = require("express-validator");
 
@@ -335,6 +338,106 @@ router.post(
 );
 
 router.post(
+  "/bmi",
+  AuthController.verify_token,
+  AuthController.is_authorized,
+  function(req,res){
+    
+    // ADGP Admin will get BMI details of Entire DB
+    if (req.decoded.priority == 1){
+      personnel.find()
+      .then(personnels => {
+        let underweight = [];
+        let overweight = [];
+        let normal = [];
+        let obese = [];
+        personnels.forEach((person,i) => {
+            if(person.bmi < 18.5) {
+              underweight.push(person)
+            }
+            else if (bmi >= 25) {
+              if(bmi >= 30) obese.push(person);
+              else overweight.push(person);
+            }
+            else {
+              normal.push(person)
+            }
+        });
+        return res.status(200).json({
+          underweight,
+          normal,
+          overweight,
+          obese
+        });
+      }).catch(err => {
+        return res.status(500).json({message : "Internal Server Error"});
+      })
+    }
+    else if(req.decoded.priority == 2) {
+      personnel.find({battalion:req.decoded.battalion}).then(personnels => {
+        let underweight = [];
+        let overweight = [];
+        let normal = [];
+        let obese = [];
+        personnels.forEach((person,i) => {
+            if(person.bmi < 18.5) {
+              underweight.push(person)
+            }
+            else if (bmi >= 25) {
+              if(bmi >= 30) obese.push(person);
+              else overweight.push(person);
+            }
+            else {
+              normal.push(person)
+            }
+        });
+        return res.status(200).json({
+          underweight,
+          normal,
+          overweight,
+          obese
+        });
+      }).catch(err => {
+        return res.status(500).json({message : "Internal Server Error"});
+      });
+    }
+    else {
+      let underweight = [];
+      let normal = [];
+      let overweight = [];
+      let obese = [];
+      new Promise((resolve,reject) => {
+        personnel.find({company:req.decoded.company}).then(async(personnels) => {
+          for(const person of personnels){
+            await record.findOne({_id : ObjectId(person.allEntries[person.allEntries.length-1])}).then(matchedRecord => {
+              if(matchedRecord.bmi < 18.5) {
+                underweight.push(person)
+              }
+              else if (matchedRecord.bmi >= 25) {
+                if(matchedRecord.bmi >= 30) obese.push(person);
+                else overweight.push(person);
+              }
+              else {
+                normal.push(person)
+              }
+            }).catch(err => {
+              return res.status(500).json({message : "Internal Server Error"});
+            });
+          }
+          resolve({underweight,normal,overweight,obese});
+        }).catch(err => {
+          reject(err);
+        });
+      }).then(result => {
+        return res.status(200).json({result});
+      })
+      .catch(err => {
+        return res.status(500).json({message: "Internal Server Error"});
+      });
+    }
+});
+
+router.post(
   "/addRecord",
   AuthController.verify_token,
   AuthController.is_authorized,
@@ -370,6 +473,7 @@ router.post(
                       ((Number(req.body.height)/100) * (Number(req.body.height)/100)),
                     score: 10,
                   });
+                  
                   req.body.parameters.forEach((param, i) => {
                     if (!ObjectId.isValid(param.healthParameter))
                       return res.status(403).json({ message: "Unauthorized Param" });
@@ -445,11 +549,12 @@ async function (req, res){
         weight: req.body.weight,
         bmi:
           Number(req.body.weight) /
-          (Number(req.body.height) * Number(req.body.height)),
+          ((Number(req.body.height)/100) * (Number(req.body.height)/100)),
         score: 10,
         remarks:req.body.remarks
       });
       let deduction = 0;
+      if(typeof (req.body.parameters) != 'undefined')
       for(const param of req.body.parameters){
         if (!ObjectId.isValid(param.healthParameter))
         return res.status(403).json({ message: "Unauthorized Param" });
