@@ -342,31 +342,35 @@ router.post(
   AuthController.verify_token,
   AuthController.is_authorized,
   function(req,res){
+
+    let underweight = [];
+    let normal = [];
+    let overweight = [];
+    let obese = [];
+    async function getBMI(personnels){
+      for(const person of personnels){
+        await record.findOne({_id : ObjectId(person.allEntries[person.allEntries.length-1])}).then(matchedRecord => {
+          if(matchedRecord.bmi < 18.5) {
+            underweight.push(person)
+          }
+          else if (matchedRecord.bmi >= 25) {
+            if(matchedRecord.bmi >= 30) obese.push(person);
+            else overweight.push(person);
+          }
+          else {
+            normal.push(person)
+          }
+        }).catch(err => {
+          console.log(err);
+        });
+      }
+    }
     
     // ADGP Admin will get BMI details of Entire DB
     if (req.decoded.priority == 1){
-      let underweight = [];
-      let normal = [];
-      let overweight = [];
-      let obese = [];
       new Promise((resolve,reject) => {
         personnel.find().then(async(personnels) => {
-          for(const person of personnels){
-            await record.findOne({_id : ObjectId(person.allEntries[person.allEntries.length-1])}).then(matchedRecord => {
-              if(matchedRecord.bmi < 18.5) {
-                underweight.push(person)
-              }
-              else if (matchedRecord.bmi >= 25) {
-                if(matchedRecord.bmi >= 30) obese.push(person);
-                else overweight.push(person);
-              }
-              else {
-                normal.push(person)
-              }
-            }).catch(err => {
-              return res.status(500).json({message : "Internal Server Error"});
-            });
-          }
+          await getBMI(personnels);
           resolve({underweight,normal,overweight,obese});
         }).catch(err => {
           reject(err);
@@ -379,28 +383,9 @@ router.post(
       });
     }
     else if(req.decoded.priority == 2) {
-      let underweight = [];
-      let normal = [];
-      let overweight = [];
-      let obese = [];
       new Promise((resolve,reject) => {
         personnel.find({battalion:req.decoded.battalion}).then(async(personnels) => {
-          for(const person of personnels){
-            await record.findOne({_id : ObjectId(person.allEntries[person.allEntries.length-1])}).then(matchedRecord => {
-              if(matchedRecord.bmi < 18.5) {
-                underweight.push(person)
-              }
-              else if (matchedRecord.bmi >= 25) {
-                if(matchedRecord.bmi >= 30) obese.push(person);
-                else overweight.push(person);
-              }
-              else {
-                normal.push(person)
-              }
-            }).catch(err => {
-              return res.status(500).json({message : "Internal Server Error"});
-            });
-          }
+          await getBMI(personnels);
           resolve({underweight,normal,overweight,obese});
         }).catch(err => {
           reject(err);
@@ -413,28 +398,9 @@ router.post(
       });
     }
     else {
-      let underweight = [];
-      let normal = [];
-      let overweight = [];
-      let obese = [];
       new Promise((resolve,reject) => {
         personnel.find({company:req.decoded.company}).then(async(personnels) => {
-          for(const person of personnels){
-            await record.findOne({_id : ObjectId(person.allEntries[person.allEntries.length-1])}).then(matchedRecord => {
-              if(matchedRecord.bmi < 18.5) {
-                underweight.push(person)
-              }
-              else if (matchedRecord.bmi >= 25) {
-                if(matchedRecord.bmi >= 30) obese.push(person);
-                else overweight.push(person);
-              }
-              else {
-                normal.push(person)
-              }
-            }).catch(err => {
-              return res.status(500).json({message : "Internal Server Error"});
-            });
-          }
+          await getBMI(personnels);
           resolve({underweight,normal,overweight,obese});
         }).catch(err => {
           reject(err);
