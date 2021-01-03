@@ -35,6 +35,7 @@ app.use('/api/v1/personnel',personnelRouter);
 app.use('/api/v1/healthParameter',healthParamRouter);
 app.use('/api/v1/health',healthRouter);
 app.use('/api/v1/filter',filterRouter);
+app.use('/api/v1/admin',adminRouter);
 
 let listener = app.listen(PORT || 3000,function(){
     console.log("Server started on PORT : " + PORT);
