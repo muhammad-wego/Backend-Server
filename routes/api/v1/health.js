@@ -345,60 +345,71 @@ router.post(
     
     // ADGP Admin will get BMI details of Entire DB
     if (req.decoded.priority == 1){
-      personnel.find()
-      .then(personnels => {
-        let underweight = [];
-        let overweight = [];
-        let normal = [];
-        let obese = [];
-        personnels.forEach((person,i) => {
-            if(person.bmi < 18.5) {
-              underweight.push(person)
-            }
-            else if (bmi >= 25) {
-              if(bmi >= 30) obese.push(person);
-              else overweight.push(person);
-            }
-            else {
-              normal.push(person)
-            }
+      let underweight = [];
+      let normal = [];
+      let overweight = [];
+      let obese = [];
+      new Promise((resolve,reject) => {
+        personnel.find().then(async(personnels) => {
+          for(const person of personnels){
+            await record.findOne({_id : ObjectId(person.allEntries[person.allEntries.length-1])}).then(matchedRecord => {
+              if(matchedRecord.bmi < 18.5) {
+                underweight.push(person)
+              }
+              else if (matchedRecord.bmi >= 25) {
+                if(matchedRecord.bmi >= 30) obese.push(person);
+                else overweight.push(person);
+              }
+              else {
+                normal.push(person)
+              }
+            }).catch(err => {
+              return res.status(500).json({message : "Internal Server Error"});
+            });
+          }
+          resolve({underweight,normal,overweight,obese});
+        }).catch(err => {
+          reject(err);
         });
-        return res.status(200).json({
-          underweight,
-          normal,
-          overweight,
-          obese
-        });
-      }).catch(err => {
-        return res.status(500).json({message : "Internal Server Error"});
+      }).then(result => {
+        return res.status(200).json({result});
       })
+      .catch(err => {
+        return res.status(500).json({message: "Internal Server Error"});
+      });
     }
     else if(req.decoded.priority == 2) {
-      personnel.find({battalion:req.decoded.battalion}).then(personnels => {
-        let underweight = [];
-        let overweight = [];
-        let normal = [];
-        let obese = [];
-        personnels.forEach((person,i) => {
-            if(person.bmi < 18.5) {
-              underweight.push(person)
-            }
-            else if (bmi >= 25) {
-              if(bmi >= 30) obese.push(person);
-              else overweight.push(person);
-            }
-            else {
-              normal.push(person)
-            }
+      let underweight = [];
+      let normal = [];
+      let overweight = [];
+      let obese = [];
+      new Promise((resolve,reject) => {
+        personnel.find({battalion:req.decoded.battalion}).then(async(personnels) => {
+          for(const person of personnels){
+            await record.findOne({_id : ObjectId(person.allEntries[person.allEntries.length-1])}).then(matchedRecord => {
+              if(matchedRecord.bmi < 18.5) {
+                underweight.push(person)
+              }
+              else if (matchedRecord.bmi >= 25) {
+                if(matchedRecord.bmi >= 30) obese.push(person);
+                else overweight.push(person);
+              }
+              else {
+                normal.push(person)
+              }
+            }).catch(err => {
+              return res.status(500).json({message : "Internal Server Error"});
+            });
+          }
+          resolve({underweight,normal,overweight,obese});
+        }).catch(err => {
+          reject(err);
         });
-        return res.status(200).json({
-          underweight,
-          normal,
-          overweight,
-          obese
-        });
-      }).catch(err => {
-        return res.status(500).json({message : "Internal Server Error"});
+      }).then(result => {
+        return res.status(200).json({result});
+      })
+      .catch(err => {
+        return res.status(500).json({message: "Internal Server Error"});
       });
     }
     else {
