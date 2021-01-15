@@ -14,8 +14,22 @@ router.post("/view/:id", AuthController.verify_token, function (req, res) {
   if (req.params.id == "all")
     battalion
       .find()
-      .then((battalions) => {
-        return res.status(200).json({ battalions });
+      .then(async(battalions) => {
+        battalionsInfo=[]
+
+        for(let bat of battalions){
+          if(bat.admins.length>0)
+          {
+              var adminInfo = await admin.findById(ObjectId(bat.admins[0]));
+              adminInfo.password = null;
+              var batInfo ={...bat[`_doc`],adminInfo};
+              battalionsInfo.push(batInfo);
+          }
+        }
+          
+        return res.status(200).json({ battalions,battalionsInfo });
+        
+        
       })
       .catch((err) => {
         console.log(err);

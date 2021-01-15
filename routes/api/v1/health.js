@@ -350,16 +350,20 @@ router.post(
     async function getBMI(personnels){
       for(const person of personnels){
         await record.findOne({_id : ObjectId(person.allEntries[person.allEntries.length-1])}).then(matchedRecord => {
-          if(matchedRecord.bmi < 18.5) {
-            underweight.push(person)
+          if(matchedRecord !== null)
+          {
+            if(matchedRecord.bmi < 18.5) {
+              underweight.push(person)
+            }
+            else if (matchedRecord.bmi >= 25) {
+              if(matchedRecord.bmi >= 30) obese.push(person);
+              else overweight.push(person);
+            }
+            else {
+              normal.push(person)
+            }
           }
-          else if (matchedRecord.bmi >= 25) {
-            if(matchedRecord.bmi >= 30) obese.push(person);
-            else overweight.push(person);
-          }
-          else {
-            normal.push(person)
-          }
+ 
         }).catch(err => {
           console.log(err);
         });
@@ -376,6 +380,7 @@ router.post(
           reject(err);
         });
       }).then(result => {
+        console.log(result)
         return res.status(200).json({result});
       })
       .catch(err => {
