@@ -572,6 +572,7 @@ async function (req, res){
       req.body.battalion = req.decoded.battalion;
     }
     try {
+      console.log(req.body)
       const adminCompany = await admin.findOne({
         username: String(req.decoded.username),
       });
@@ -580,7 +581,7 @@ async function (req, res){
         const dateGreaterThan = new Date(String(req.body.year)+"-"+String(req.body.month)+"-"+String(1));   
         const Battalion = await battalion.findOne({_id:req.body.battalion}); 
         const HealthParameters = await healthParameter.find();
-          
+        console.log(Battalion)
         let HealthParamStages = new Array();
           for (const Parameter of HealthParameters) {
             let paramObj = {
