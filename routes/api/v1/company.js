@@ -705,11 +705,17 @@ async function (req, res){
             "MonthlyRecs":{
               "dateOfEntry":1,
               "weight":1,
-              "parameters":1
+              "parameters":1,
+              "score":1
             }
           }
       }
     ]);
+    let personnelScoresObj = {
+      poor: 0,
+      medium: 0,
+      good: 0,
+    };
     const HealthParameters = await healthParameter.find();
     let HealthParamStages = new Array();
     for (const Parameter of HealthParameters) {
@@ -729,8 +735,13 @@ async function (req, res){
     }
     for(const p of PersonHealthOfMonth){
       for(const ph of p.MonthlyRecs){
+
+        if (ph.score < 4) personnelScoresObj.poor += 1;
+        else if (ph.score >= 4 && ph.score < 7)
+          personnelScoresObj.medium += 1;
+        else personnelScoresObj.good += 1;
+
         for(const hp of ph.parameters){
-          console.log(hp);
           for(const param of HealthParamStages){
             if(String(hp.healthParameter) == String(param.ParameterId)){
               for(const stage of param.stages){
@@ -747,7 +758,7 @@ async function (req, res){
        
     }
       
-    res.status(200).json({HealthParamStages});
+    res.status(200).json({HealthParamStages,personnelScoresObj});
 
     }else{
       return res.staus(401).json({message:"Unauthorized"});
