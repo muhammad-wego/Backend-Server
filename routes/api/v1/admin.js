@@ -16,16 +16,15 @@ router.post('/validate',function(req,res){
 });
 
 // Route to Update Password
-router.post('/updatePassword',AuthController.verify_token,function(req,res){    
+router.post('/updatePassword',AuthController.verify_token,AuthController.is_authorized,function(req,res){    
     if(req.decoded.priority == 1) {
-        admin.findOne({_id:req.body.adminID}).then(matchedAdmin => {
+        admin.findOne({username:req.body.username}).then(matchedAdmin => {
             if(!matchedAdmin) return res.status(403).json({message : "Admin Not Found"});
             else {
                 bcrypt.hash(req.body.newPassword,10,function(err,hash){
                     if(err) res.status(500).json({message : "Password Hashing Failed"});
                     else {
                         matchedAdmin.password = hash;
-
                         matchedAdmin.save((err,result) => {
                             if(err) return res.status(500).json({message : "Error Saving Admin to Database"});
                             else return res.status(200).json({message : "Admin Password Saved"});
@@ -39,7 +38,7 @@ router.post('/updatePassword',AuthController.verify_token,function(req,res){
         })
     } 
     else if (req.decoded.priority == 2) {
-        admin.findOne({username:req.decoded.username,battalion:req.decoded.battalion}).then(matchedAdmin => {
+        admin.findOne({username:req.body.username,battalion:req.decoded.battalion}).then(matchedAdmin => {
             if(!matchedAdmin) return res.status(403).json({message : "User Doesn't exist in Battalion"});
             else {
                 bcrypt.hash(req.body.newPassword,10,function(err,hash){
