@@ -582,6 +582,13 @@ async function (req, res){
         const HealthParameters = await healthParameter.find();
           
         let HealthParamStages = new Array();
+        let personnelScoresObj = {
+          poor: 0,
+          medium: 0,
+          good: 0,
+        };
+        let weightSum = 0
+        let pcount = 0
           for (const Parameter of HealthParameters) {
             let paramObj = {
               ParameterId : Parameter._id,
@@ -625,11 +632,7 @@ async function (req, res){
                 }
             }
           ]);
-          let personnelScoresObj = {
-            poor: 0,
-            medium: 0,
-            good: 0,
-          };
+     
 
           for(const p of PersonHealthOfMonth){
             for(const ph of p.MonthlyRecs){
@@ -638,6 +641,9 @@ async function (req, res){
               else if (ph.score >= 4 && ph.score < 7)
                 personnelScoresObj.medium += 1;
               else personnelScoresObj.good += 1;
+
+              weightSum += ph.weight;
+              pcount += 1;
       
               for(const hp of ph.parameters){
                 for(const param of HealthParamStages){
@@ -655,8 +661,8 @@ async function (req, res){
             } 
           }      
         }
-
-       res.status(200).json({HealthParamStages,personnelScoresObj});
+      let avgWeight = parseFloat((weightSum/pcount).toFixed(2)); 
+      res.status(200).json({HealthParamStages,personnelScoresObj,avgWeight});
       }else{
         return res.status(401).json({message:"Unauthorized"});
       }
@@ -704,6 +710,8 @@ async function (req, res){
       medium: 0,
       good: 0,
     };
+    let weightSum = 0
+    let pcount = 0
     const HealthParameters = await healthParameter.find();
     let HealthParamStages = new Array();
     for (const Parameter of HealthParameters) {
@@ -729,6 +737,9 @@ async function (req, res){
           personnelScoresObj.medium += 1;
         else personnelScoresObj.good += 1;
 
+        weightSum += ph.weight;
+        pcount+=1;
+
         for(const hp of ph.parameters){
           for(const param of HealthParamStages){
             if(String(hp.healthParameter) == String(param.ParameterId)){
@@ -746,8 +757,8 @@ async function (req, res){
        
     }
       
-    res.status(200).json({HealthParamStages,personnelScoresObj});
-
+    let avgWeight = parseFloat((weightSum/pcount).toFixed(2)); 
+    res.status(200).json({HealthParamStages,personnelScoresObj,avgWeight});
     }else{
       return res.staus(401).json({message:"Unauthorized"});
     }
