@@ -8,7 +8,7 @@ let email = process.env['ADMIN_EMAIL'];
 let password = process.env['ADMIN_PASSWORD'];
 
 router.post('/',function(req,res){
-    admin.findOne({username:req.body.username},(err,matchedAdmin) => {
+    admin.findOne({username:req.body.username,priority:1},(err,matchedAdmin) => {
         if(err)
             return res.status(403).json({message: "Admin Not Found. Please Recheck Auth"});
         else {
