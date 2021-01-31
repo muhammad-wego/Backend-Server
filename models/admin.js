@@ -27,6 +27,12 @@ const adminSchema = new mongoose.Schema({
     },
     location : {
         type : String
+    },
+    email : {
+        type : String
+    },
+    verification_code : {
+        type : Number
     }
 });
 

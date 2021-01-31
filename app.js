@@ -25,6 +25,7 @@ let healthParamRouter = require('./routes/api/v1/healthParameter');
 let healthRouter = require('./routes/api/v1/health');
 let filterRouter = require('./routes/api/v1/filter');
 let adminRouter = require('./routes/api/v1/admin');
+let forgotPasswordRouter = require('./routes/api/v1/forgotPassword');
 
 // Routes
 app.use('/api/v1/login',loginRouter);
@@ -36,6 +37,7 @@ app.use('/api/v1/healthParameter',healthParamRouter);
 app.use('/api/v1/health',healthRouter);
 app.use('/api/v1/filter',filterRouter);
 app.use('/api/v1/admin',adminRouter);
+app.use('/api/v1/forgotPassword',forgotPasswordRouter);
 
 let listener = app.listen(PORT || 3000,function(){
     console.log("Server started on PORT : " + PORT);
