@@ -547,7 +547,7 @@ async function (req, res){
           const hparam = await healthParameter.findOne({_id:ObjectId(param.healthParameter)})
           for(const stg of hparam.stages){
             if(stg.name === param.stage){
-              deduction += stg.score;
+              deduction += Math.abs(stg.score);
             }
           }
         }
