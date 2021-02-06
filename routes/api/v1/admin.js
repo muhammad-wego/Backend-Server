@@ -85,6 +85,24 @@ router.post('/updatePassword',AuthController.verify_token,AuthController.is_auth
         });
     }
 });
+router.post('/getInfo',AuthController.verify_token,AuthController.is_authorized,function(req,res){
+    try{
+        if(!req.decoded.company)
+            req.decoded.company = null
+        if(!req.decoded.battalion)
+            req.decoded.battalion = null
+        let UserObj = {
+            Username : req.decoded.username,
+            Priority : req.decoded.priority,
+            Battalion : req.decoded.battalion,
+            Company : req.decoded.company
+        }
+        res.status(200).json({User:UserObj});
+    }catch(err){
+        console.log(err);
+        res.status(500).json({message:"Internal Server Error"});
+    }
+});
 
 
 module.exports = router;
