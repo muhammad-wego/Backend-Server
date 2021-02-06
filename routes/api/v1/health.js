@@ -530,8 +530,7 @@ async function (req, res){
         height: req.body.height,
         weight: req.body.weight,
         bmi:
-          Number(req.body.weight) /
-          ((Number(req.body.height)/100) * (Number(req.body.height)/100)),
+          parseFloat((Number(req.body.weight) / ((Number(req.body.height)/100) * (Number(req.body.height)/100))).toFixed(2)),
         score: 10,
         remarks:req.body.remarks
       });
