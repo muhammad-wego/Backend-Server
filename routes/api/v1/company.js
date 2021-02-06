@@ -452,7 +452,7 @@ router.post(
         let monthlyAvgObj={
           Month:tempMonth+1,
           Year:currentYear,
-          AverageWeight:weightSum/recCount
+          AverageWeight:parseFloat((weightSum/recCount).toFixed(2))
         }
         monthAvgWeightArr.push(monthlyAvgObj);
       }

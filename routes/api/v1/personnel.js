@@ -6,6 +6,7 @@ const ObjectId = require("mongodb").ObjectId;
 const AuthController = require("../../../contollers/AuthController");
 const {  startSession } = require("mongoose");
 const admin = require("../../../models/admin");
+const battalion = require("../../../models/battalion");
 
 router.post(
   "/view/:id",
@@ -214,17 +215,16 @@ router.post("/changeCompany", AuthController.verify_token,
 AuthController.is_authorized,
 async function (req, res){
   try{
-    if(req.decoded.priority<3 || req.decoded.company==req.body.company){
-      const Company = await company.findOne({_id:ObjectId(req.body.companyId)});
-      if(!Company) return res.status(400).json({message:"Invalid Company Id"});
-      const Personnel = await personnel.findOne({_id:ObjectId(req.body.personnelId)});
-      const oldCompany = await company.findOne({_id:ObjectId(Personnel.company)});
-      const Admin = await admin.findOne({personnelInfo:Personnel._id})
-      if(Admin){
-        //check if Personnel is an admin of the old company
-        //strip admin rights first
-        await admin.deleteOne({_id:Admin._id});
-      }
+    const Personnel = await personnel.findOne({_id:ObjectId(req.body.personnelId)});
+    if(!Personnel) return res.status(400).json({message:"Invalid Personnel Id"});
+    const oldCompany = await company.findOne({_id:ObjectId(Personnel.company)});
+    const Company = await company.findOne({_id:ObjectId(req.body.companyId)});
+    if(!Company) return res.status(400).json({message:"Invalid Company Id"});
+    if(req.decoded.priority < 2 || (
+      req.decoded.priority == 2) && (
+        String(req.decoded.battalion) == String(oldCompany.battalion)) && (
+          String(req.decoded.battalion) == String(Company.battalion))
+          ){
       //remove from old company
       let oldCompanyPersonnels = oldCompany.personnel; 
       for(let i = 0;i < oldCompanyPersonnels.length;i++){
@@ -236,13 +236,16 @@ async function (req, res){
       let newCompanyPersonnels = Company.personnel;
       newCompanyPersonnels.push(Personnel._id); 
 
-      await personnel.updateOne({_id:ObjectId(req.body.personnelId)},{$set:{company:Company._id}});//Update Personnel
+      await personnel.updateOne({_id:ObjectId(req.body.personnelId)},{$set:{company:Company._id}},{$set:{battalion:Company.battalion}});//Update Personnel
       await company.updateOne({_id:ObjectId(oldCompany._id)},{$set:{personnel:oldCompanyPersonnels}})//Update old company
       await company.updateOne({_id:ObjectId(req.body.companyId)},{$set:{personnel:newCompanyPersonnels}})//Update new Company
 
-       const updatedPersonnel = await personnel.findOne({_id:req.body.personnelId});
-       res.status(200).json({oldCompany:oldCompany._id,
-        updatedCompany:updatedPersonnel.company});
+      const updatedPersonnel = await personnel.findOne({_id:req.body.personnelId});
+      res.status(200).json({
+        message:"Company Changed Successfully",
+        oldCompany:oldCompany._id,
+        updatedCompany:updatedPersonnel.company
+      });
     } 
     else{
       return res.status(401).json({message:"Unauthorized"});  
