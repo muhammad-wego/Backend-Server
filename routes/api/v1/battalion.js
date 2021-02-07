@@ -271,7 +271,6 @@ router.post(
               console.log(i.company);
               if (i.CurrMonRecs.length != 0) {
                 for (const j of i.CurrMonRecs) {
-                  console.log(j.weight,j.dateOfEntry);
                   weightSum += j.weight;
                   recCount++;
                 }
@@ -283,7 +282,7 @@ router.post(
           monthlyAvgObj = {
             Month: tempMonth + 1,
             Year: currentYear,
-            AverageWeight: parseFloat((weightSum/recCount).toFixed(2))
+            AverageWeight: parseFloat((TotalWeight/TotalRec).toFixed(2))
           }
           monthAvgWeightArr.push(monthlyAvgObj);
         }
