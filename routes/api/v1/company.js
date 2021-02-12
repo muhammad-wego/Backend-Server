@@ -16,6 +16,7 @@ router.post(
   AuthController.verify_token,
   AuthController.is_authorized,
   async function (req, res) {
+    console.log(req.body)
     if(!req.body.battalion)
     {
       req.body.battalion = req.decoded.battalion;
@@ -27,7 +28,7 @@ router.post(
       {
         return res.status(401).json({ message: "Unauthorized" });
       } 
-      let companies = await company.find({battalion:ObjectId(req.decoded.battalion)});
+      let companies = await company.find({battalion:ObjectId(req.body.battalion)});
       console.log(companies)
       if (!companies) {
         return res.status(500).json({ message: "Internal Server Error" });
