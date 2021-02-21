@@ -114,6 +114,7 @@ router.delete(
         await personnel.deleteMany({company:ObjectId(c._id)});
         await company.deleteOne({_id:ObjectId(c._id)});
       }
+      await admin.deleteMany({battalion:ObjectId(req.body.battalionID)});
       battalion.deleteOne(
       { _id: ObjectId(req.body.battalionID) },
       (err, result) => {
