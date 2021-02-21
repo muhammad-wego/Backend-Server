@@ -58,9 +58,12 @@ router.post(
       location: req.body.battalionLocation,
     });
     const hash = await bcrypt.hash(req.body.adminPassword,10);
+
+    const Batt = await battalion.find({battalionNumber:req.body.battalionNumber});
+    if(Batt.length>0) return res.status(409).json({message:`Battalion ${req.body.battalionNumber} Already Exists`});
+
     newBattalion.save((err, result) => {
       if (err){
-        console.log(err);
        return res.status(500).json({ message: "Internal Server Error1" });
       }
       else {
@@ -518,6 +521,7 @@ router.post(
     try {
       if (req.decoded.priority === 1) {
         const Personnels = await personnel.find();
+
         let individualInfoArr = new Array();
         for (const p of Personnels) {
           const lastRecord = await personnelHealth.findOne({
@@ -535,9 +539,12 @@ router.post(
             score = lastRecord.score;
           }
           const CompanyInfo = await company.findById(p.company);
-          let companyName ;
+          const BattalionInfo = await battalion.findById(p.battalion)
+          let companyName ,battalionNumber;
           if(!CompanyInfo) companyName = null;
           else companyName = CompanyInfo.companyName
+          if(!BattalionInfo) battalionNumber = null;
+          else battalionNumber = BattalionInfo.battalionNumber
           const individualInfoObj = {
             _id: p._id,
             metalNo: p.metalNo,
@@ -545,6 +552,8 @@ router.post(
             Weight: weight,
             height: height,
             Company: p.company,
+            Battalion: p.battalion,
+            battalionNumber : battalionNumber,
             companyName: companyName,
             rank: p.rank,
             Score: score,
