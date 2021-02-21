@@ -380,8 +380,8 @@ router.post(
           });
           if (!LastReport) continue;
 
-          if (LastReport.score < 4) personnelScoresObj.poor += 1;
-          else if (LastReport.score >= 4 && LastReport.score < 7)
+          if (LastReport.score < 7) personnelScoresObj.poor += 1;
+          else if (LastReport.score >= 7 && LastReport.score < 9)
             personnelScoresObj.medium += 1;
           else personnelScoresObj.good += 1;
 
@@ -746,8 +746,8 @@ async function (req, res){
     for(const p of PersonHealthOfMonth){
       for(const ph of p.MonthlyRecs){
 
-        if (ph.score < 4) personnelScoresObj.poor += 1;
-        else if (ph.score >= 4 && ph.score < 7)
+        if (ph.score < 7) personnelScoresObj.poor += 1;
+        else if (ph.score >= 7 && ph.score < 9)
           personnelScoresObj.medium += 1;
         else personnelScoresObj.good += 1;
 
