@@ -111,7 +111,11 @@ router.delete(
       return res.status(403).json({ message: "Unauthorized" });
       const Companies = await company.find({battalion:ObjectId(req.body.battalionID)});
       for(const c of Companies){
-        await personnel.deleteMany({company:ObjectId(c._id)});
+        const cPersonnels = await personnel.find({company:ObjectId(c._id)});
+        for(const p of cPersonnels){
+          await personnelHealth.deleteMany({personnel:ObjectId(p._id)});
+          await personnel.delete({_id:ObjectId(p._id)});
+        }
         await company.deleteOne({_id:ObjectId(c._id)});
       }
       await admin.deleteMany({battalion:ObjectId(req.body.battalionID)});

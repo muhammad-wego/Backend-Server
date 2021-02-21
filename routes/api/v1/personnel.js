@@ -7,6 +7,7 @@ const AuthController = require("../../../contollers/AuthController");
 const {  startSession } = require("mongoose");
 const admin = require("../../../models/admin");
 const battalion = require("../../../models/battalion");
+const personnelHealth = require("../../../models/personnelHealth");
 
 router.post(
   "/view/:id",
@@ -222,6 +223,7 @@ router.delete(
                   i--;
                 }
               }
+              await personnelHealth.deleteMany({personnel:ObjectId(req.body.personnelId)});
               await company.updateOne({_id:ObjectId(req.body.company)},{$set:{personnel:matchedCompany.personnel}});
               personnel
                 .deleteOne(
