@@ -9,7 +9,7 @@ const personnelHealth = require("../../../models/personnelHealth");
 const bcrypt = require("bcrypt");
 const ObjectId = require("mongodb").ObjectId;
 const AuthController = require("../../../contollers/AuthController");
-const { findOne } = require("../../../models/admin");
+const { findOne, deleteMany } = require("../../../models/admin");
 
 router.post(
   "/view/:id",
@@ -261,6 +261,7 @@ router.delete("/remove", AuthController.verify_token,AuthController.is_authorize
     return res.status(403).json({ message: "Unauthorized" });
   personnel
     .deleteMany({ company: ObjectId(req.body.company) }, async(err, result) => {
+      await admin.deleteMany({company:ObjectId(req.body.company)});
       if (err) res.status(500).json({ message: "Internal Server Error" });
       var Battalion = await battalion.findById(req.decoded.battalion);
       var companies=[] ;
