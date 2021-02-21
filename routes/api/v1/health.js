@@ -243,21 +243,24 @@ router.post(
         }
         personnelHealth
           .findOne({ _id: ObjectId(LatestEntry) })
-          .then(async (lastEntry) => {
-            // var parameter = [];
-            // for (const param in lastEntry.parameters) {
-            //   await HealParam.findById(
-            //     ObjectId(lastEntry.parameters[param]["healthParameter"])
-            //   )
-            //     .then((resp) => {
-            //       parameter.push(resp);
-            //     })
-            //     .catch((err) => {
-            //       return res
-            //         .status(500)
-            //         .json({ message: "No Parameter Found" });
-            //     });
-            // }
+          .then( (lastEntry) => {
+            lastEntry = lastEntry.toObject();
+            var bmiVal = lastEntry.bmi;
+            var weightCondition = ""
+            if(bmiVal < 18.5) {
+              weightCondition = "Underweight"
+            }
+            else if (bmiVal >= 25) {
+              if(bmiVal >= 30) weightCondition = "Obese";
+              else weightCondition = "Overweight";
+            }
+            else {
+              weightCondition = "Normal"
+            }
+
+            lastEntry[`weightCondition`] = weightCondition;
+
+
             const previousEntries = entries.allEntries;
             return res.status(200).json({ lastEntry, previousEntries,weightArr });
           })
@@ -523,14 +526,14 @@ async function (req, res){
           return res.status(400).json({message:"Entry already done for this month"});
         }
       if(!req.body.remarks) req.body.remarks = "";
+      var bmiVal = parseFloat((Number(req.body.weight) / ((Number(req.body.height)/100) * (Number(req.body.height)/100))).toFixed(2));
       let newHealthRep = new personnelHealth({
         personnel: matchedPersonnel._id,
         parameters: [],
         dateOfEntry: new Date().getTime(),
         height: req.body.height,
         weight: req.body.weight,
-        bmi:
-          parseFloat((Number(req.body.weight) / ((Number(req.body.height)/100) * (Number(req.body.height)/100))).toFixed(2)),
+        bmi:bmiVal,
         score: 10,
         remarks:req.body.remarks
       });
@@ -557,6 +560,15 @@ async function (req, res){
         newHealthRep.parameters.push(currentParam);
       }
       newHealthRep.score -= deduction;
+
+      if(bmiVal < 18.5) {
+        newHealthRep.score -= 1;
+      }
+      else if (bmiVal >= 25) {
+        if(bmiVal >= 30) newHealthRep.score -= 2;
+        else newHealthRep.score -= 1;;
+      }
+
       if(newHealthRep.score < 0) newHealthRep.score = 0;
       await newHealthRep.save((err, result) => {
         if (err)

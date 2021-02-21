@@ -12,32 +12,92 @@ router.post(
   "/view/:id",
   AuthController.verify_token,
   AuthController.is_authorized,
-  function (req, res) {
+ function (req, res) {
     if (req.params.id == "all") {
       if (req.decoded.priority == 1) {
         personnel
           .find()
-          .then((personnels) => {
+          .then(async(Personnels) => {
+            var personnels = []
+            console.log(Personnels)
+            for(let person of Personnels)
+            {
+              const comp = await company.find({_id:ObjectId(person.company)});
+              const batt = await battalion.find({_id:ObjectId(person.battalion)});
+              let personl = {
+                _id:person._id,
+                personnelName: person.personnelName,
+                companyName: comp.length>0? comp[0].companyName:"",
+                battalionNumber: batt.length>0?batt[0].battalionNumber:"",
+                company:person.company,
+                battalion:person.battalion,
+                rank:person.rank,
+                metalNo: person.metalNo,
+                dateOfBirth: person.dateOfBirth,
+              }
+              personnels.push(personl);
+            }
+
             return res.status(200).json({ personnels });
           })
           .catch((err) => {
+            console.log(err)
             return res.status(500).json({ message: "Internal Server Error" });
           });
       } 
       else if (req.decoded.priority == 2) {
         personnel
           .find({battalion:req.decoded.battalion})
-          .then((personnels) => {
+          .then(async(Personnels) => {
+            var personnels = []
+            console.log(Personnels)
+            for(let person of Personnels)
+            {
+              const comp = await company.find({_id:ObjectId(person.company)});
+              const batt = await battalion.find({_id:ObjectId(person.battalion)});
+              let personl = {
+                _id:person._id,
+                personnelName: person.personnelName,
+                companyName: comp.length>0? comp[0].companyName:"",
+                battalionNumber: batt.length>0?batt[0].battalionNumber:"",
+                company:person.company,
+                battalion:person.battalion,
+                rank:person.rank,
+                metalNo: person.metalNo,
+                dateOfBirth: person.dateOfBirth,
+              }
+              personnels.push(personl);
+            }
             return res.status(200).json({ personnels });
           })
           .catch((err) => {
+            console.log(err)
             return res.status(500).json({ message : "Internal Server Error"});
           });
       }
       else {
         personnel
           .find({ company: req.decoded.company })
-          .then((personnels) => {
+          .then(async (Personnels) => {
+            var personnels = []
+            console.log(Personnels)
+            for(let person of Personnels)
+            {
+              const comp = await company.find({_id:ObjectId(person.company)});
+              const batt = await battalion.find({_id:ObjectId(person.battalion)});
+              let personl = {
+                _id:person._id,
+                personnelName: person.personnelName,
+                companyName: comp.length>0? comp[0].companyName:"",
+                battalionNumber: batt.length>0?batt[0].battalionNumber:"",
+                company:person.company,
+                battalion:person.battalion,
+                rank:person.rank,
+                metalNo: person.metalNo,
+                dateOfBirth: person.dateOfBirth,
+              }
+              personnels.push(personl);
+            }
             return res.status(200).json({ personnels });
           })
           .catch((err) => {

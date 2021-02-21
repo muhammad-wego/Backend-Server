@@ -256,19 +256,26 @@ router.post("/add", AuthController.verify_token,AuthController.is_authorized, fu
     });
 });
 
-router.delete("/remove", AuthController.verify_token, function (req, res) {
+router.delete("/remove", AuthController.verify_token,AuthController.is_authorized,function (req, res) {
   if (req.decoded.priority > 2)
     return res.status(403).json({ message: "Unauthorized" });
-
   personnel
-    .deleteMany({ company: ObjectId(req.body.companyID) }, (err, result) => {
+    .deleteMany({ company: ObjectId(req.body.company) }, async(err, result) => {
       if (err) res.status(500).json({ message: "Internal Server Error" });
+      var Battalion = await battalion.findById(req.decoded.battalion);
+      var companies=[] ;
+      if(Battalion) companies = [...Battalion.companies];
+      companies = companies.filter((val)=> String(val) !== String(req.body.company));
+      Battalion.companies=companies
+      Battalion.save((err,result)=>{
+        if (err) return res.status(500).json({ message: "Internal Server Error" });
+        company.deleteOne({ _id: ObjectId(req.body.company) }, async(err, result) => {
+          if (err) return res.status(500).json({ message: "Internal Server Error" });
+          return res.status(200).json({ message: "Company Deleted" });
+        });
+        
+      })
 
-      company.deleteOne({ _id: ObjectId(req.body.company) }, (err, result) => {
-        console.log(result);
-        if (err) res.status(500).json({ message: "Internal Server Error" });
-        return res.status(200).json({ message: "Company Deleted" });
-      });
     })
     .catch((err) => {
       if (err) console.log(err);
