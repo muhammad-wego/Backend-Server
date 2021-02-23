@@ -267,7 +267,7 @@ router.delete("/remove", AuthController.verify_token,AuthController.is_authorize
       var companies=[] ;
       if(Battalion) companies = [...Battalion.companies];
       companies = companies.filter((val)=> String(val) !== String(req.body.company));
-      Battalion.companies=companies
+      Battalion.companies = companies
       Battalion.save((err,result)=>{
         if (err) return res.status(500).json({ message: "Internal Server Error" });
         company.deleteOne({ _id: ObjectId(req.body.company) }, async(err, result) => {
