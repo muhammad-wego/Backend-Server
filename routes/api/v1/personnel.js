@@ -33,6 +33,7 @@ router.post(
                 battalion:person.battalion,
                 rank:person.rank,
                 metalNo: person.metalNo,
+                lastEntry:person.lastEntry,
                 dateOfBirth: person.dateOfBirth,
               }
               personnels.push(personl);
@@ -64,6 +65,7 @@ router.post(
                 battalion:person.battalion,
                 rank:person.rank,
                 metalNo: person.metalNo,
+                lastEntry:person.lastEntry,
                 dateOfBirth: person.dateOfBirth,
               }
               personnels.push(personl);
@@ -93,6 +95,7 @@ router.post(
                 company:person.company,
                 battalion:person.battalion,
                 rank:person.rank,
+                lastEntry:person.lastEntry,
                 metalNo: person.metalNo,
                 dateOfBirth: person.dateOfBirth,
               }

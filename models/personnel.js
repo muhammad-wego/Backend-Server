@@ -27,6 +27,9 @@ const personnelSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  lastEntry:{
+    type:Date,
+  },
   allEntries: [
     {
       type: mongoose.Schema.Types.ObjectId,
