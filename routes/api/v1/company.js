@@ -107,12 +107,13 @@ router.post("/add", AuthController.verify_token,AuthController.is_authorized, fu
     req.body.battalion = req.decoded.battalion;
   }
   if (req.decoded.priority > 2)
-    return res.status(403).json({ message: "Unauthorized" });
+    return res.status(403).json({ message: "Unauthorized2" });
   battalion
     .findOne({ _id: ObjectId(req.body.battalion) })
     .then(async (matchedBattalion) => {
+      console.log(matchedBattalion)
       if (!matchedBattalion)
-        return res.status(403).json({ message: "Unauthorized" });
+        return res.status(403).json({ message: "Unauthorized 1" });
       else {
         if (!ObjectId.isValid(req.body.battalion))
           return res.status(403).json({ message: "Invalid Battalion" });
