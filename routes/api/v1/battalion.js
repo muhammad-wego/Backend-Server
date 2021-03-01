@@ -334,9 +334,13 @@ router.post(
         for (const cmpnyId of Battalion.companies) {
           const cmpny = await company.findOne({ _id: ObjectId(cmpnyId) });
           if (!cmpny) continue;
-          for (const pId of cmpny.personnel) {
+         /* for (const pId of cmpny.personnel) {
             const p = await personnel.findOne({ _id: ObjectId(pId) });
             if (!p) continue;
+            Personnels.push(p);
+          }*/
+          const prsnls = await personnel.find({company:ObjectId(cmpnyId)});
+          for(const p of prsnls){
             Personnels.push(p);
           }
         }

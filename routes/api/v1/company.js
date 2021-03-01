@@ -107,12 +107,13 @@ router.post("/add", AuthController.verify_token,AuthController.is_authorized, fu
     req.body.battalion = req.decoded.battalion;
   }
   if (req.decoded.priority > 2)
-    return res.status(403).json({ message: "Unauthorized" });
+    return res.status(403).json({ message: "Unauthorized2" });
   battalion
     .findOne({ _id: ObjectId(req.body.battalion) })
     .then(async (matchedBattalion) => {
+      console.log(matchedBattalion)
       if (!matchedBattalion)
-        return res.status(403).json({ message: "Unauthorized" });
+        return res.status(403).json({ message: "Unauthorized 1" });
       else {
         if (!ObjectId.isValid(req.body.battalion))
           return res.status(403).json({ message: "Invalid Battalion" });
@@ -267,7 +268,7 @@ router.delete("/remove", AuthController.verify_token,AuthController.is_authorize
       var companies=[] ;
       if(Battalion) companies = [...Battalion.companies];
       companies = companies.filter((val)=> String(val) !== String(req.body.company));
-      Battalion.companies=companies
+      Battalion.companies = companies
       Battalion.save((err,result)=>{
         if (err) return res.status(500).json({ message: "Internal Server Error" });
         company.deleteOne({ _id: ObjectId(req.body.company) }, async(err, result) => {

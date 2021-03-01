@@ -34,6 +34,7 @@ router.post(
                 battalion:person.battalion,
                 rank:person.rank,
                 metalNo: person.metalNo,
+                lastEntry:person.lastEntry,
                 dateOfBirth: person.dateOfBirth,
               }
               personnels.push(personl);
@@ -65,6 +66,7 @@ router.post(
                 battalion:person.battalion,
                 rank:person.rank,
                 metalNo: person.metalNo,
+                lastEntry:person.lastEntry,
                 dateOfBirth: person.dateOfBirth,
               }
               personnels.push(personl);
@@ -94,6 +96,7 @@ router.post(
                 company:person.company,
                 battalion:person.battalion,
                 rank:person.rank,
+                lastEntry:person.lastEntry,
                 metalNo: person.metalNo,
                 dateOfBirth: person.dateOfBirth,
               }
@@ -210,22 +213,16 @@ router.delete(
       personnel
         .findOne({ _id: ObjectId(req.body.personnelID) })
         .then(async(matchedPersonnel) => {
-          console.log(matchedPersonnel.company == req.decoded.company);
           if (!matchedPersonnel)
             return res.status(403).json({ message: "Forbidded" });
           else {
             if (String(matchedPersonnel.company) === String(req.decoded.company)) {
               const matchedCompany = await company.findOne({_id:ObjectId(matchedPersonnel.company)});
-              console.log(matchedCompany);
-              for(let i = 0; i<matchedCompany.personnel.length; i++){
-                if(String(matchedCompany.personnel[i]) === String(req.body.personnelID)){
-                  matchedCompany.personnel.splice(i,1);
-                  i--;
-                }
-              }
-              await personnelHealth.deleteMany({personnel:ObjectId(req.body.personnelId)});
-              await company.updateOne({_id:ObjectId(req.body.company)},{$set:{personnel:matchedCompany.personnel}});
-              personnel
+              matchedCompany.personnel = matchedCompany.personnel.filter((val)=>String(val)!=String(req.body.personnelID));
+              await matchedCompany.save((err,result)=>{
+                if(err){
+                  return res.status(500).json({message:"Internal Server Error"})}
+                  personnel
                 .deleteOne(
                   { _id: ObjectId(req.body.personnelID) },
                   (err, result) => {
@@ -243,6 +240,8 @@ router.delete(
                     .status(500)
                     .json({ message: "Internal Server Error" });
                 });
+                });
+            
             } else return res.status(403).json({ message: "Unauthorized" });
           }
         })

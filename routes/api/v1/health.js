@@ -576,11 +576,13 @@ async function (req, res){
             .status(500)
             .json({ message: "Internal Server Error" });
         matchedPersonnel.allEntries.push(result._id);
+        matchedPersonnel.lastEntry = new Date();
         if (
           typeof req.body.followUpRequired != "undefined" &&
           typeof req.body.followUpRequired == "boolean"
         )
         matchedPersonnel.followUpRequired = req.body.followUpRequired;
+     
         matchedPersonnel.save((err, _result) => {
           if (err)
             return res
