@@ -111,7 +111,11 @@ router.delete(
       return res.status(403).json({ message: "Unauthorized" });
       const Companies = await company.find({battalion:ObjectId(req.body.battalionID)});
       for(const c of Companies){
-        await personnel.deleteMany({company:ObjectId(c._id)});
+        const cPersonnels = await personnel.find({company:ObjectId(c._id)});
+        for(const p of cPersonnels){
+          await personnelHealth.deleteMany({personnel:ObjectId(p._id)});
+          await personnel.delete({_id:ObjectId(p._id)});
+        }
         await company.deleteOne({_id:ObjectId(c._id)});
       }
       await admin.deleteMany({battalion:ObjectId(req.body.battalionID)});
@@ -330,9 +334,13 @@ router.post(
         for (const cmpnyId of Battalion.companies) {
           const cmpny = await company.findOne({ _id: ObjectId(cmpnyId) });
           if (!cmpny) continue;
-          for (const pId of cmpny.personnel) {
+         /* for (const pId of cmpny.personnel) {
             const p = await personnel.findOne({ _id: ObjectId(pId) });
             if (!p) continue;
+            Personnels.push(p);
+          }*/
+          const prsnls = await personnel.find({company:ObjectId(cmpnyId)});
+          for(const p of prsnls){
             Personnels.push(p);
           }
         }

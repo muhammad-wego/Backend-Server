@@ -7,6 +7,7 @@ const AuthController = require("../../../contollers/AuthController");
 const {  startSession } = require("mongoose");
 const admin = require("../../../models/admin");
 const battalion = require("../../../models/battalion");
+const personnelHealth = require("../../../models/personnelHealth");
 
 router.post(
   "/view/:id",
