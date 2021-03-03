@@ -370,7 +370,7 @@ router.post(
             height = "No records";
             score = "No records";
           } else {
-            weight = ((lastRecord.weight-lwt)/lastRecord.weight)*100;
+            weight = lastRecord.weight; //((lastRecord.weight-lwt)/lastRecord.weight)*100;
             height = lastRecord.height;
             score = lastRecord.score;
           }
@@ -379,7 +379,7 @@ router.post(
             _id: p._id,
             metalNo: p.metalNo,
             Name: p.personnelName,
-            Weight: weight-lwt,
+            Weight: weight,//-lwt,
             height: height,
             Company: p.company,
             companyName: CompanyInfo.companyName,
